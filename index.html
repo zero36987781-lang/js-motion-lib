@@ -1,0 +1,2152 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Pixel Office - Virtual Workspace</title>
+<style>
+/* ============================================
+   [STYLE] 전체 레이아웃 & UI 스타일
+   ============================================ */
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#1a1a2e;font-family:'Segoe UI','맑은 고딕',sans-serif}
+
+/* --- 메인 캔버스 --- */
+canvas#game{display:block;position:fixed;top:0;left:0;width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges;z-index:1;cursor:crosshair}
+
+/* --- 상단 HUD --- */
+#hud{position:fixed;top:0;left:0;width:100%;height:40px;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);display:flex;align-items:center;padding:0 12px;z-index:100;gap:10px;border-bottom:1px solid rgba(255,255,255,.1)}
+#hud .logo{color:#fff;font-weight:900;font-size:14px;letter-spacing:1px}
+#hud .logo span{color:#4ECDC4}
+#hud .info{color:rgba(255,255,255,.6);font-size:11px;margin-left:auto}
+#hud .floor-btn{padding:3px 10px;border:1px solid rgba(255,255,255,.3);border-radius:4px;background:rgba(255,255,255,.1);color:#fff;font-size:11px;cursor:pointer;transition:.2s}
+#hud .floor-btn:hover{background:rgba(78,205,196,.3);border-color:#4ECDC4}
+#hud .floor-btn.active{background:rgba(78,205,196,.5);border-color:#4ECDC4}
+
+/* --- 채팅 패널 --- */
+#chatPanel{position:fixed;right:0;top:40px;width:320px;height:calc(100% - 40px);background:rgba(15,15,30,.92);backdrop-filter:blur(12px);border-left:1px solid rgba(255,255,255,.1);z-index:90;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s ease}
+#chatPanel.open{transform:translateX(0)}
+#chatHead{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:8px}
+#chatHead .tab{padding:4px 12px;border-radius:12px;font-size:12px;color:rgba(255,255,255,.5);cursor:pointer;border:1px solid transparent;transition:.2s}
+#chatHead .tab.active{color:#fff;background:rgba(78,205,196,.3);border-color:#4ECDC4}
+#chatHead .close-btn{margin-left:auto;color:rgba(255,255,255,.5);cursor:pointer;font-size:18px}
+#chatMessages{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:6px}
+#chatMessages::-webkit-scrollbar{width:4px}
+#chatMessages::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:2px}
+.msg{padding:8px 10px;border-radius:8px;font-size:12px;line-height:1.5;max-width:90%;word-break:break-word}
+.msg.mine{background:rgba(78,205,196,.25);color:#fff;align-self:flex-end;border-bottom-right-radius:2px}
+.msg.other{background:rgba(255,255,255,.08);color:rgba(255,255,255,.85);align-self:flex-start;border-bottom-left-radius:2px}
+.msg .name{font-size:10px;font-weight:700;color:#4ECDC4;margin-bottom:2px}
+.msg .dm-tag{font-size:9px;color:#FF6B6B;margin-left:4px}
+#chatInput{display:flex;padding:8px;gap:6px;border-top:1px solid rgba(255,255,255,.1)}
+#chatInput input{flex:1;padding:8px 12px;border:1px solid rgba(255,255,255,.15);border-radius:8px;background:rgba(255,255,255,.06);color:#fff;font-size:12px;outline:none}
+#chatInput input:focus{border-color:#4ECDC4}
+#chatInput input::placeholder{color:rgba(255,255,255,.3)}
+#chatInput button{padding:6px 14px;border:none;border-radius:8px;background:#4ECDC4;color:#000;font-weight:700;font-size:12px;cursor:pointer}
+#chatTarget{padding:4px 10px;font-size:11px;color:rgba(255,255,255,.5);border-bottom:1px solid rgba(255,255,255,.05);display:none}
+#chatTarget span{color:#FF6B6B;font-weight:700}
+#chatTarget .clear-target{margin-left:8px;color:#4ECDC4;cursor:pointer;text-decoration:underline}
+
+/* --- 하단 툴바 --- */
+#toolbar{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:100}
+.tool-btn{width:42px;height:42px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.5);backdrop-filter:blur(8px);color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s}
+.tool-btn:hover{background:rgba(78,205,196,.3);border-color:#4ECDC4}
+.tool-btn:active{transform:scale(.9)}
+.tool-btn.on{background:rgba(78,205,196,.4);border-color:#4ECDC4}
+
+/* --- 미니맵 --- */
+#minimap{position:fixed;bottom:70px;right:12px;width:160px;height:120px;border:1px solid rgba(255,255,255,.2);border-radius:8px;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);z-index:80;overflow:hidden}
+#minimap canvas{width:100%;height:100%;image-rendering:pixelated}
+
+/* --- 캐릭터 목록 --- */
+#peopleList{position:fixed;left:0;top:40px;width:220px;height:calc(100% - 40px);background:rgba(15,15,30,.92);backdrop-filter:blur(12px);border-right:1px solid rgba(255,255,255,.1);z-index:90;overflow-y:auto;transform:translateX(-100%);transition:transform .3s ease;padding:10px}
+#peopleList.open{transform:translateX(0)}
+#peopleList h3{color:#fff;font-size:13px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:8px}
+.person-item{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer;transition:.15s;margin-bottom:2px}
+.person-item:hover{background:rgba(78,205,196,.15)}
+.person-item .avatar-preview{width:28px;height:28px;border-radius:4px;image-rendering:pixelated}
+.person-item .pname{color:rgba(255,255,255,.8);font-size:12px;flex:1}
+.person-item .dm-btn{font-size:10px;color:#4ECDC4;cursor:pointer;padding:2px 6px;border:1px solid #4ECDC4;border-radius:4px}
+
+/* --- 도움말 --- */
+#help{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(15,15,30,.95);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:30px;color:#fff;z-index:200;max-width:420px;width:90%;display:none}
+#help h2{font-size:18px;margin-bottom:14px;color:#4ECDC4}
+#help p{font-size:12px;line-height:1.8;color:rgba(255,255,255,.7);margin-bottom:8px}
+#help kbd{padding:2px 6px;border-radius:3px;background:rgba(255,255,255,.15);font-size:11px;font-family:monospace}
+#help .close-help{position:absolute;top:12px;right:14px;color:rgba(255,255,255,.4);cursor:pointer;font-size:20px}
+#overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:199;display:none}
+</style>
+</head>
+<body>
+
+<!-- ============================================
+     [HTML] HUD 상단바
+     ============================================ -->
+<div id="hud">
+  <div class="logo">PIXEL<span>OFFICE</span></div>
+  <button class="floor-btn active" data-floor="15">15F 라운지</button>
+  <button class="floor-btn" data-floor="14">14F 업무</button>
+  <button class="floor-btn" data-floor="13">13F 회의</button>
+  <span class="info" id="posInfo">x:0 y:0 | 100명 온라인</span>
+</div>
+
+<!-- ============================================
+     [HTML] 메인 게임 캔버스
+     ============================================ -->
+<canvas id="game"></canvas>
+
+<!-- ============================================
+     [HTML] 채팅 패널 (우측 슬라이드)
+     ============================================ -->
+<div id="chatPanel">
+  <div id="chatHead">
+    <div class="tab active" data-mode="all">전체</div>
+    <div class="tab" data-mode="dm">1:1</div>
+    <div class="tab" data-mode="group">그룹</div>
+    <span class="close-btn" id="closeChat">&times;</span>
+  </div>
+  <div id="chatTarget"><span id="targetName"></span>에게 보내는 중 <span class="clear-target" id="clearTarget">취소</span></div>
+  <div id="chatMessages"></div>
+  <div id="chatInput">
+    <input type="text" id="msgInput" placeholder="메시지 입력... (Enter 전송)" maxlength="200">
+    <button id="sendBtn">전송</button>
+  </div>
+</div>
+
+<!-- ============================================
+     [HTML] 캐릭터 목록 (좌측 슬라이드)
+     ============================================ -->
+<div id="peopleList">
+  <h3>👥 사람 목록 (100명)</h3>
+  <div id="pListInner"></div>
+</div>
+
+<!-- ============================================
+     [HTML] 미니맵
+     ============================================ -->
+<div id="minimap"><canvas id="minimapCanvas"></canvas></div>
+
+<!-- ============================================
+     [HTML] 하단 툴바
+     ============================================ -->
+<div id="toolbar">
+  <button class="tool-btn" id="tbPeople" title="사람 목록">👥</button>
+  <button class="tool-btn" id="tbChat" title="채팅">💬</button>
+  <button class="tool-btn" id="tbEmoji" title="이모지">😀</button>
+  <button class="tool-btn" id="tbDance" title="댄스">💃</button>
+  <button class="tool-btn" id="tbHelp" title="도움말">❓</button>
+  <button class="tool-btn" id="tbZoomIn" title="확대">🔍+</button>
+  <button class="tool-btn" id="tbZoomOut" title="축소">🔍-</button>
+</div>
+
+<!-- ============================================
+     [HTML] 도움말 모달
+     ============================================ -->
+<div id="overlay"></div>
+<div id="help">
+  <span class="close-help" id="closeHelp">&times;</span>
+  <h2>🎮 조작법</h2>
+  <p><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 또는 <kbd>↑</kbd><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd> — 이동</p>
+  <p><kbd>Enter</kbd> — 채팅 열기 / 메시지 전송</p>
+  <p><kbd>E</kbd> — 이모지 표시</p>
+  <p><kbd>Space</kbd> — 점프 (물리법칙 적용)</p>
+  <p><kbd>1</kbd>~<kbd>3</kbd> — 층 이동 (15F/14F/13F)</p>
+  <p><kbd>Tab</kbd> — 사람 목록 토글</p>
+  <p>클릭으로 NPC 선택 → DM 전송 가능</p>
+  <p>모바일: 터치로 이동, 하단 버튼 활용</p>
+</div>
+
+<script>
+/* ╔══════════════════════════════════════════════════════════════╗
+   ║  PIXEL OFFICE — 게더타운 스타일 가상 오피스                    ║
+   ║  단일 HTML 파일 / Canvas 2D / 100명 캐릭터 / 메시지 시스템    ║
+   ╚══════════════════════════════════════════════════════════════╝ */
+
+(function(){
+"use strict";
+
+/* ============================================
+   [SECTION 1] 캔버스 & 기본 설정
+   ============================================ */
+var canvas = document.getElementById('game');
+var ctx = canvas.getContext('2d');
+var W, H;
+
+/** 캔버스 크기 갱신 */
+function resize(){
+  W = canvas.width = innerWidth;
+  H = canvas.height = innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+/* ============================================
+   [SECTION 2] 상수 & 전역 변수
+   ============================================ */
+var TILE     = 32;        /* 타일 크기 (px) */
+var MAP_COLS = 60;        /* 맵 가로 타일 수 */
+var MAP_ROWS = 40;        /* 맵 세로 타일 수 */
+var GRAVITY  = 0.5;       /* 중력 가속도 */
+var JUMP_FORCE = -8;      /* 점프력 */
+var MOVE_SPEED = 2.5;     /* 이동 속도 */
+var NPC_COUNT  = 99;      /* NPC 수 (플레이어 1 + NPC 99 = 100명) */
+
+/* --- 카메라 --- */
+var camera = { x:0, y:0, zoom:1.0, minZoom:0.4, maxZoom:2.5, targetX:0, targetY:0 };
+
+/* --- 현재 층 --- */
+var currentFloor = 15;
+
+/* --- 입력 상태 --- */
+var keys = {};
+
+/* --- 시간 --- */
+var tick = 0;
+var lastTime = 0;
+var dt = 0;
+
+/* ============================================
+   [SECTION 3] 색상 팔레트 — 캐릭터 100가지 조합
+   ============================================ */
+
+/** 피부색 10가지 */
+var SKIN_COLORS = [
+  '#FFDBB5','#F5C5A3','#D2956A','#C68642','#8D5524',
+  '#FFCBA4','#E8B88A','#A0724A','#6B4226','#F9E0C0'
+];
+
+/** 머리색 10가지 */
+var HAIR_COLORS = [
+  '#2C1B0E','#5C3317','#8B4513','#D4A44C','#F5D060',
+  '#C0392B','#E74C3C','#8E44AD','#2980B9','#1ABC9C'
+];
+
+/** 셔츠색 20가지 */
+var SHIRT_COLORS = [
+  '#E74C3C','#3498DB','#2ECC71','#F39C12','#9B59B6',
+  '#1ABC9C','#E67E22','#EC407A','#AB47BC','#26A69A',
+  '#42A5F5','#66BB6A','#FFA726','#EF5350','#7E57C2',
+  '#26C6DA','#D4E157','#FF7043','#8D6E63','#78909C'
+];
+
+/** 바지색 10가지 */
+var PANTS_COLORS = [
+  '#2C3E50','#1A237E','#263238','#37474F','#4E342E',
+  '#212121','#455A64','#3E2723','#1B5E20','#4A148C'
+];
+
+/** 머리스타일 타입 10가지 */
+var HAIR_STYLES = ['short','long','mohawk','bun','curly','ponytail','buzz','side','afro','bald'];
+
+/** 액세서리 10가지 */
+var ACCESSORIES = ['none','glasses','sunglasses','hat','cap','headband','earring','mask','scarf','bowtie'];
+
+/* ============================================
+   [SECTION 4] 캐릭터 생성 시스템
+   ============================================ */
+
+/** 이름 풀 */
+var FIRST_NAMES = ['민준','서연','지호','하은','예준','수아','도윤','지우','시우','하린',
+  '준서','소율','현우','다은','지훈','채원','건우','유진','선우','나윤',
+  '민서','지아','우진','시은','재윤','서윤','태윤','윤서','동현','아린',
+  'Alex','Emma','Jake','Mia','Leo','Zoe','Kai','Luna','Finn','Aria',
+  'Noah','Lily','Liam','Chloe','Evan','Ivy','Ryan','Nora','Sam','Ruby',
+  'Max','Ella','Tom','Amy','Dan','Joy','Ben','Mae','Ian','Sky',
+  '유나','하준','소미','준혁','지민','태희','성민','보람','재현','은지',
+  '현서','다인','승우','소연','정우','미래','태민','하나','원준','별이',
+  '세진','가은','호진','나래','진우','온유','규민','다솔','용준','이슬',
+  '창민','세라','형준','수빈','기현','혜원','대한','미소','한결','고운'];
+
+/** 한 사람의 데이터를 생성 */
+function generatePerson(index, isPlayer){
+  /* 색상 조합 — 인덱스 기반으로 100가지 고유 조합 */
+  var skinIdx   = index % SKIN_COLORS.length;
+  var hairIdx   = (index * 3 + 1) % HAIR_COLORS.length;
+  var shirtIdx  = (index * 7 + 2) % SHIRT_COLORS.length;
+  var pantsIdx  = (index * 11 + 3) % PANTS_COLORS.length;
+  var styleIdx  = (index * 13 + 5) % HAIR_STYLES.length;
+  var accIdx    = (index * 17 + 7) % ACCESSORIES.length;
+
+  /* NPC 시작 위치 — 사무실 내부 랜덤 */
+  var startX, startY;
+  if(isPlayer){
+    startX = 30 * TILE;
+    startY = 20 * TILE;
+  } else {
+    /* 실내 영역 (벽 내부) */
+    startX = (5 + Math.floor(Math.random() * 50)) * TILE;
+    startY = (5 + Math.floor(Math.random() * 30)) * TILE;
+  }
+
+  return {
+    id: index,
+    name: FIRST_NAMES[index % FIRST_NAMES.length],
+    isPlayer: !!isPlayer,
+
+    /* --- 위치 & 물리 --- */
+    x: startX,
+    y: startY,
+    vx: 0,
+    vy: 0,
+    onGround: true,
+    width: TILE * 0.8,
+    height: TILE * 1.2,
+
+    /* --- 외형 --- */
+    skin:  SKIN_COLORS[skinIdx],
+    hair:  HAIR_COLORS[hairIdx],
+    shirt: SHIRT_COLORS[shirtIdx],
+    pants: PANTS_COLORS[pantsIdx],
+    hairStyle: HAIR_STYLES[styleIdx],
+    accessory: ACCESSORIES[accIdx],
+
+    /* --- 애니메이션 --- */
+    dir: 0,           /* 0=앞, 1=왼, 2=뒤, 3=오른 */
+    frame: 0,
+    animTimer: 0,
+    moving: false,
+
+    /* --- NPC AI --- */
+    aiState: 'idle',    /* idle, walk, sit, chat */
+    aiTimer: 0,
+    aiTargetX: 0,
+    aiTargetY: 0,
+    aiPath: [],
+
+    /* --- 말풍선 --- */
+    bubble: null,        /* { text, timer, type } */
+    emoji: null,         /* { char, timer } */
+
+    /* --- 점프/댄스 --- */
+    jumping: false,
+    dancing: false,
+    danceTimer: 0,
+
+    /* --- 선택 상태 --- */
+    selected: false
+  };
+}
+
+/* 100명 생성 */
+var people = [];
+var player = null;
+
+function initPeople(){
+  people = [];
+  /* 플레이어 (인덱스 0) */
+  var p = generatePerson(0, true);
+  p.name = '나';
+  people.push(p);
+  player = p;
+  /* NPC 99명 */
+  for(var i = 1; i <= NPC_COUNT; i++){
+    people.push(generatePerson(i, false));
+  }
+}
+
+/* ============================================
+   [SECTION 5] 타일맵 — 층별 맵 데이터
+   ============================================ */
+
+/*
+  타일 타입:
+  0 = 빈 공간 (통유리 밖 — 배경 보임)
+  1 = 바닥 (밝은 나무)
+  2 = 벽
+  3 = 유리벽 (통유리)
+  4 = 책상
+  5 = 의자
+  6 = 소파
+  7 = 화분
+  8 = 화이트보드
+  9 = 카페테리아 카운터
+  10 = 엘리베이터
+  11 = 계단
+  12 = 카펫
+  13 = 회의 테이블
+*/
+
+var TILE_SOLID = {2:true, 4:true, 9:true, 13:true, 8:true}; /* 충돌 있는 타일 */
+var TILE_SEMI  = {5:true, 6:true, 7:true, 10:true};          /* 위에 올라설 수 있는 타일 */
+
+/** 맵 생성 (층별) */
+function generateMap(floor){
+  var map = [];
+  var r, c;
+
+  /* 전체를 0(외부)으로 초기화 */
+  for(r = 0; r < MAP_ROWS; r++){
+    map[r] = [];
+    for(c = 0; c < MAP_COLS; c++){
+      map[r][c] = 0;
+    }
+  }
+
+  /* --- 건물 외벽 --- */
+  var bL=3, bR=56, bT=2, bB=37; /* 건물 경계 */
+
+  /* 바닥 채우기 */
+  for(r = bT+1; r < bB; r++){
+    for(c = bL+1; c < bR; c++){
+      map[r][c] = 1; /* 바닥 */
+    }
+  }
+
+  /* 벽 (위, 아래) */
+  for(c = bL; c <= bR; c++){
+    map[bT][c] = 2;
+    map[bB][c] = 2;
+  }
+  /* 벽 (왼쪽 — 통유리!) */
+  for(r = bT; r <= bB; r++){
+    map[r][bL] = 3; /* 유리벽 */
+  }
+  /* 벽 (오른쪽 — 통유리!) */
+  for(r = bT; r <= bB; r++){
+    map[r][bR] = 3; /* 유리벽 */
+  }
+
+  /* --- 층별 배치 --- */
+  if(floor === 15){
+    /* 15F: 라운지 — 소파, 카페, 화분 */
+
+    /* 카페 카운터 */
+    for(c = 10; c <= 16; c++) map[5][c] = 9;
+
+    /* 소파 구역들 */
+    var sofaPositions = [[8,10],[8,14],[8,18],[12,10],[12,14],[12,18],
+                         [20,8],[20,12],[20,16],[20,20],
+                         [28,10],[28,14],[28,18],[28,22]];
+    for(var si=0; si<sofaPositions.length; si++){
+      var sr=sofaPositions[si][0], sc2=sofaPositions[si][1];
+      if(sr<bB && sc2<bR){
+        map[sr][sc2] = 6;
+        map[sr][sc2+1] = 6;
+      }
+    }
+
+    /* 화분 — 유리벽 따라 */
+    for(r = bT+2; r < bB; r += 4){
+      map[r][bL+1] = 7;
+      map[r][bR-1] = 7;
+    }
+
+    /* 카펫 구역 */
+    for(r = 8; r <= 12; r++){
+      for(c = 8; c <= 20; c++){
+        if(map[r][c] === 1) map[r][c] = 12;
+      }
+    }
+
+    /* 엘리베이터 */
+    map[bT+1][bR-3] = 10;
+    map[bT+1][bR-2] = 10;
+
+  } else if(floor === 14){
+    /* 14F: 업무 공간 — 책상, 의자 배열 */
+
+    /* 책상 열 배치 */
+    for(var row=0; row<5; row++){
+      for(var col2=0; col2<8; col2++){
+        var dr = 6 + row*6;
+        var dc = 6 + col2*6;
+        if(dr<bB-1 && dc<bR-1){
+          map[dr][dc] = 4;     /* 책상 */
+          map[dr][dc+1] = 4;
+          map[dr+1][dc] = 5;   /* 의자 */
+          map[dr+1][dc+1] = 5;
+        }
+      }
+    }
+
+    /* 화이트보드 */
+    map[4][15] = 8;
+    map[4][16] = 8;
+    map[4][30] = 8;
+    map[4][31] = 8;
+
+    /* 화분 */
+    for(r = bT+2; r < bB; r += 5){
+      map[r][bL+1] = 7;
+      map[r][bR-1] = 7;
+    }
+
+    map[bT+1][bR-3] = 10;
+    map[bT+1][bR-2] = 10;
+
+  } else if(floor === 13){
+    /* 13F: 회의실 — 큰 테이블, 소규모 회의실 */
+
+    /* 대회의실 */
+    for(r = 6; r <= 10; r++){
+      for(c = 8; c <= 16; c++){
+        if(r>=7 && r<=9 && c>=9 && c<=15){
+          map[r][c] = 13; /* 회의 테이블 */
+        } else {
+          map[r][c] = 12; /* 카펫 */
+        }
+      }
+    }
+    /* 회의실 의자 */
+    for(c=9;c<=15;c+=2){map[6][c]=5;map[10][c]=5;}
+
+    /* 소회의실 3개 */
+    for(var rm=0; rm<3; rm++){
+      var rx=20+rm*10, ry=6;
+      for(r=ry;r<=ry+5;r++){
+        for(c=rx;c<=rx+6;c++){
+          if(r===ry||r===ry+5||c===rx||c===rx+6){
+            map[r][c]=2; /* 벽 */
+          } else if(r>=ry+2&&r<=ry+3&&c>=rx+2&&c<=rx+4){
+            map[r][c]=13; /* 테이블 */
+          } else {
+            map[r][c]=12;
+          }
+        }
+      }
+      map[ry+5][rx+3]=1; /* 문 */
+    }
+
+    /* 화분, 엘리베이터 */
+    for(r=bT+2;r<bB;r+=6){map[r][bL+1]=7;map[r][bR-1]=7;}
+    map[bT+1][bR-3]=10;
+    map[bT+1][bR-2]=10;
+  }
+
+  return map;
+}
+
+var maps = {};
+maps[15] = generateMap(15);
+maps[14] = generateMap(14);
+maps[13] = generateMap(13);
+
+var currentMap = maps[15];
+
+/* ============================================
+   [SECTION 6] 배경 렌더링 — 창밖 뷰 (산, 바다, 하늘)
+   ============================================ */
+
+/** 배경 요소들 (비행기, 배, 구름, 패러글라이딩) */
+var bgElements = [];
+
+function initBgElements(){
+  bgElements = [];
+  var i;
+
+  /* 구름 15개 */
+  for(i = 0; i < 15; i++){
+    bgElements.push({
+      type: 'cloud',
+      x: Math.random() * 3000 - 500,
+      y: 50 + Math.random() * 200,
+      speed: 0.2 + Math.random() * 0.5,
+      size: 30 + Math.random() * 60,
+      opacity: 0.5 + Math.random() * 0.4
+    });
+  }
+
+  /* 비행기 2대 */
+  for(i = 0; i < 2; i++){
+    bgElements.push({
+      type: 'airplane',
+      x: -200 + Math.random() * 2000,
+      y: 60 + Math.random() * 100,
+      speed: 1 + Math.random() * 1.5,
+      size: 20 + Math.random() * 15
+    });
+  }
+
+  /* 배 3척 */
+  for(i = 0; i < 3; i++){
+    bgElements.push({
+      type: 'ship',
+      x: Math.random() * 2500,
+      y: 380 + Math.random() * 40,
+      speed: 0.1 + Math.random() * 0.3,
+      size: 25 + Math.random() * 20
+    });
+  }
+
+  /* 패러글라이딩 2대 */
+  for(i = 0; i < 2; i++){
+    bgElements.push({
+      type: 'paraglider',
+      x: Math.random() * 2000,
+      y: 120 + Math.random() * 80,
+      speed: 0.4 + Math.random() * 0.6,
+      size: 15 + Math.random() * 10,
+      swayPhase: Math.random() * Math.PI * 2
+    });
+  }
+
+  /* 새 떼 */
+  for(i = 0; i < 5; i++){
+    bgElements.push({
+      type: 'bird',
+      x: Math.random() * 2500,
+      y: 100 + Math.random() * 150,
+      speed: 0.6 + Math.random() * 0.8,
+      size: 4 + Math.random() * 4,
+      wingPhase: Math.random() * Math.PI * 2
+    });
+  }
+}
+
+/** 배경 전체 그리기 (통유리 밖) */
+function drawBackground(camX, camY){
+  var parallax = 0.15; /* 시차 스크롤 비율 */
+  var px = -camX * parallax;
+  var py = -camY * parallax;
+
+  /* --- 하늘 그라디언트 --- */
+  var skyGrd = ctx.createLinearGradient(0, 0, 0, H);
+  skyGrd.addColorStop(0, '#87CEEB');
+  skyGrd.addColorStop(0.3, '#B0E0E6');
+  skyGrd.addColorStop(0.5, '#E0F7FA');
+  skyGrd.addColorStop(0.65, '#FFE0B2');
+  skyGrd.addColorStop(0.75, '#4FC3F7');
+  skyGrd.addColorStop(1, '#0277BD');
+  ctx.fillStyle = skyGrd;
+  ctx.fillRect(0, 0, W, H);
+
+  /* --- 태양 --- */
+  var sunX = W * 0.75 + px * 0.3;
+  var sunY = H * 0.15 + py * 0.2;
+  var sunGrd = ctx.createRadialGradient(sunX, sunY, 10, sunX, sunY, 80);
+  sunGrd.addColorStop(0, 'rgba(255,255,200,1)');
+  sunGrd.addColorStop(0.3, 'rgba(255,230,150,0.6)');
+  sunGrd.addColorStop(1, 'rgba(255,200,100,0)');
+  ctx.fillStyle = sunGrd;
+  ctx.beginPath();
+  ctx.arc(sunX, sunY, 80, 0, Math.PI*2);
+  ctx.fill();
+
+  /* --- 산 (뒤쪽) --- */
+  ctx.fillStyle = '#7986CB';
+  ctx.beginPath();
+  ctx.moveTo(-100 + px*0.3, H*0.55);
+  var mountainPts = [0,0.52, 0.08,0.42, 0.15,0.48, 0.22,0.36, 0.3,0.44, 0.38,0.38, 0.45,0.46, 0.55,0.34, 0.62,0.42, 0.7,0.38, 0.78,0.45, 0.85,0.4, 0.92,0.48, 1.0,0.44, 1.08,0.5];
+  for(i=0; i<mountainPts.length; i+=2){
+    ctx.lineTo(W * mountainPts[i] + px*0.3, H * mountainPts[i+1]);
+  }
+  ctx.lineTo(W+100, H*0.55);
+  ctx.closePath();
+  ctx.fill();
+
+  /* --- 산 (앞쪽) --- */
+  ctx.fillStyle = '#5C6BC0';
+  ctx.beginPath();
+  ctx.moveTo(-100+px*0.5, H*0.58);
+  var mt2=[0,0.56, 0.1,0.48, 0.18,0.54, 0.28,0.44, 0.35,0.52, 0.42,0.46, 0.5,0.54, 0.6,0.42, 0.68,0.5, 0.75,0.45, 0.82,0.52, 0.9,0.48, 1,0.55, 1.1,0.5];
+  for(i=0;i<mt2.length;i+=2) ctx.lineTo(W*mt2[i]+px*0.5,H*mt2[i+1]);
+  ctx.lineTo(W+100,H*0.58);ctx.closePath();ctx.fill();
+
+  /* --- 눈 덮인 산 꼭대기 --- */
+  ctx.fillStyle = 'rgba(255,255,255,0.6)';
+  ctx.beginPath();
+  ctx.moveTo(W*0.22+px*0.3, H*0.36);
+  ctx.lineTo(W*0.19+px*0.3, H*0.40);
+  ctx.lineTo(W*0.25+px*0.3, H*0.40);
+  ctx.closePath();
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(W*0.55+px*0.3, H*0.34);
+  ctx.lineTo(W*0.52+px*0.3, H*0.39);
+  ctx.lineTo(W*0.58+px*0.3, H*0.39);
+  ctx.closePath();
+  ctx.fill();
+
+  /* --- 바다 --- */
+  var seaY = H * 0.58;
+  var seaGrd = ctx.createLinearGradient(0, seaY, 0, H);
+  seaGrd.addColorStop(0, '#4FC3F7');
+  seaGrd.addColorStop(0.3, '#039BE5');
+  seaGrd.addColorStop(1, '#01579B');
+  ctx.fillStyle = seaGrd;
+  ctx.fillRect(0, seaY, W, H - seaY);
+
+  /* 바다 반짝임 */
+  ctx.fillStyle = 'rgba(255,255,255,0.15)';
+  for(i = 0; i < 30; i++){
+    var wx = ((i * 97 + tick * 0.3) % (W + 200)) - 50 + px * 0.2;
+    var wy = seaY + 10 + (i * 37 % (H - seaY - 20));
+    var ww = 15 + (i * 13 % 30);
+    ctx.fillRect(wx, wy, ww, 2);
+  }
+
+  /* --- 배경 요소 업데이트 & 그리기 --- */
+  for(i = 0; i < bgElements.length; i++){
+    var el = bgElements[i];
+    el.x += el.speed;
+
+    /* 화면 밖으로 나가면 재배치 */
+    if(el.x > W / parallax + 500) el.x = -300;
+    if(el.x < -400) el.x = W / parallax + 400;
+
+    var ex = el.x * parallax + px * (el.type === 'ship' ? 0.4 : 0.2);
+    var ey = el.y + py * 0.1;
+
+    if(el.type === 'cloud')       drawCloud(ex, ey, el.size, el.opacity);
+    else if(el.type === 'airplane') drawAirplane(ex, ey, el.size);
+    else if(el.type === 'ship')     drawShip(ex, ey, el.size);
+    else if(el.type === 'paraglider') drawParaglider(ex, ey + Math.sin(tick*0.03 + el.swayPhase)*10, el.size);
+    else if(el.type === 'bird')     drawBird(ex, ey, el.size, el.wingPhase);
+  }
+}
+
+/** 구름 픽셀 아트 */
+function drawCloud(x, y, size, opacity){
+  ctx.globalAlpha = opacity;
+  ctx.fillStyle = '#FFFFFF';
+  var s = size;
+  pxRect(x, y, s, s*0.4);
+  pxRect(x+s*0.15, y-s*0.2, s*0.7, s*0.3);
+  pxRect(x+s*0.3, y-s*0.35, s*0.4, s*0.2);
+  ctx.globalAlpha = 1;
+}
+
+/** 비행기 픽셀 아트 */
+function drawAirplane(x, y, size){
+  ctx.fillStyle = '#ECEFF1';
+  pxRect(x, y, size*1.5, size*0.3); /* 몸통 */
+  ctx.fillStyle = '#E74C3C';
+  pxRect(x-size*0.3, y-size*0.15, size*0.4, size*0.6); /* 꼬리 */
+  ctx.fillStyle = '#90A4AE';
+  pxRect(x+size*0.3, y-size*0.1, size*0.8, size*0.1); /* 날개 */
+  pxRect(x+size*0.3, y+size*0.3, size*0.8, size*0.1);
+  ctx.fillStyle = '#4FC3F7';
+  for(var w=0; w<4; w++){
+    pxRect(x+size*0.4+w*size*0.2, y+size*0.05, size*0.08, size*0.08); /* 창문 */
+  }
+  /* 궤적 */
+  ctx.fillStyle = 'rgba(255,255,255,0.3)';
+  pxRect(x-size*0.5, y+size*0.1, size*0.3, size*0.05);
+  pxRect(x-size*0.9, y+size*0.1, size*0.25, size*0.04);
+}
+
+/** 배 픽셀 아트 */
+function drawShip(x, y, size){
+  ctx.fillStyle = '#5D4037';
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(x + size*1.2, y);
+  ctx.lineTo(x + size, y + size*0.4);
+  ctx.lineTo(x + size*0.2, y + size*0.4);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = '#F5F5F5';
+  pxRect(x+size*0.3, y-size*0.5, size*0.15, size*0.5); /* 돛대 */
+  ctx.fillStyle = '#FFFFFF';
+  ctx.beginPath();
+  ctx.moveTo(x+size*0.45, y-size*0.45);
+  ctx.lineTo(x+size*0.8, y-size*0.1);
+  ctx.lineTo(x+size*0.45, y-size*0.1);
+  ctx.closePath();
+  ctx.fill();
+  /* 물결 */
+  ctx.fillStyle = 'rgba(255,255,255,0.3)';
+  pxRect(x-size*0.1, y+size*0.4, size*1.4, size*0.06);
+}
+
+/** 패러글라이딩 픽셀 아트 */
+function drawParaglider(x, y, size){
+  /* 캐노피 */
+  ctx.fillStyle = '#FF7043';
+  ctx.beginPath();
+  ctx.ellipse(x, y, size*1.2, size*0.4, 0, Math.PI, 0);
+  ctx.fill();
+  ctx.fillStyle = '#FFAB91';
+  ctx.beginPath();
+  ctx.ellipse(x, y, size*0.8, size*0.25, 0, Math.PI, 0);
+  ctx.fill();
+  /* 줄 */
+  ctx.strokeStyle = '#795548';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(x-size*0.5, y);
+  ctx.lineTo(x, y+size*1.2);
+  ctx.moveTo(x+size*0.5, y);
+  ctx.lineTo(x, y+size*1.2);
+  ctx.stroke();
+  /* 사람 */
+  ctx.fillStyle = '#FFB74D';
+  pxRect(x-2, y+size*1.2, 4, 6);
+  ctx.fillStyle = '#42A5F5';
+  pxRect(x-3, y+size*1.2+6, 6, 5);
+}
+
+/** 새 픽셀 아트 */
+function drawBird(x, y, size, phase){
+  var wingY = Math.sin(tick * 0.15 + phase) * size * 0.5;
+  ctx.fillStyle = '#37474F';
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(x - size, y + wingY);
+  ctx.lineTo(x - size*0.3, y);
+  ctx.lineTo(x + size*0.3, y);
+  ctx.lineTo(x + size, y + wingY);
+  ctx.closePath();
+  ctx.fill();
+}
+
+/** 픽셀 느낌 사각형 (소수점 제거) */
+function pxRect(x, y, w, h){
+  ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+}
+
+/* ============================================
+   [SECTION 7] 타일 렌더링
+   ============================================ */
+
+/** 타일 색상표 */
+var TILE_COLORS = {
+  0: null,                    /* 투명 (배경 보임) */
+  1: '#F5E6CA',               /* 밝은 나무 바닥 */
+  2: '#78909C',               /* 벽 */
+  3: 'rgba(173,216,230,0.35)',/* 통유리 */
+  4: '#8D6E63',               /* 책상 */
+  5: '#455A64',               /* 의자 */
+  6: '#7E57C2',               /* 소파 */
+  7: '#4CAF50',               /* 화분 */
+  8: '#ECEFF1',               /* 화이트보드 */
+  9: '#6D4C41',               /* 카페 카운터 */
+  10: '#B0BEC5',              /* 엘리베이터 */
+  11: '#A1887F',              /* 계단 */
+  12: '#D1C4E9',              /* 카펫 */
+  13: '#5D4037'               /* 회의 테이블 */
+};
+
+function drawTile(col, row, tileType, sx, sy){
+  if(tileType === 0) return; /* 빈 공간은 배경이 보임 */
+
+  var tx = col * TILE - sx;
+  var ty = row * TILE - sy;
+
+  /* 화면 밖 컬링 */
+  if(tx + TILE < 0 || tx > W || ty + TILE < 0 || ty > H) return;
+
+  var color = TILE_COLORS[tileType];
+  if(!color) return;
+
+  ctx.fillStyle = color;
+  ctx.fillRect(tx|0, ty|0, TILE, TILE);
+
+  /* --- 타일별 디테일 --- */
+  switch(tileType){
+    case 1: /* 바닥 — 나무결 */
+      ctx.fillStyle = 'rgba(0,0,0,0.03)';
+      ctx.fillRect(tx|0, (ty+TILE*0.5)|0, TILE, 1);
+      if((col+row)%2===0){
+        ctx.fillStyle = 'rgba(0,0,0,0.02)';
+        ctx.fillRect(tx|0, ty|0, TILE, TILE);
+      }
+      break;
+
+    case 3: /* 통유리 — 반사 효과 */
+      ctx.fillStyle = 'rgba(255,255,255,0.15)';
+      ctx.fillRect(tx+2|0, ty+2|0, 2, TILE-4);
+      ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+      ctx.strokeRect(tx|0, ty|0, TILE, TILE);
+      break;
+
+    case 4: /* 책상 */
+      ctx.fillStyle = '#A1887F';
+      ctx.fillRect(tx+2|0, ty+2|0, TILE-4, TILE-4);
+      ctx.fillStyle = '#BCAAA4';
+      ctx.fillRect(tx+4|0, ty+4|0, TILE-8, TILE-8);
+      /* 모니터 */
+      ctx.fillStyle = '#263238';
+      ctx.fillRect(tx+8|0, ty+6|0, 16, 10);
+      ctx.fillStyle = '#4FC3F7';
+      ctx.fillRect(tx+9|0, ty+7|0, 14, 8);
+      break;
+
+    case 5: /* 의자 */
+      ctx.fillStyle = '#546E7A';
+      ctx.fillRect(tx+8|0, ty+4|0, 16, 20);
+      ctx.fillStyle = '#37474F';
+      ctx.fillRect(tx+10|0, ty+24|0, 12, 4);
+      break;
+
+    case 6: /* 소파 */
+      ctx.fillStyle = '#9575CD';
+      ctx.fillRect(tx+2|0, ty+6|0, TILE-4, TILE-8);
+      ctx.fillStyle = '#7E57C2';
+      ctx.fillRect(tx+2|0, ty+6|0, 4, TILE-8);
+      ctx.fillRect(tx+TILE-6|0, ty+6|0, 4, TILE-8);
+      ctx.fillStyle = '#B39DDB';
+      ctx.fillRect(tx+6|0, ty+10|0, TILE-12, 8);
+      break;
+
+    case 7: /* 화분 */
+      ctx.fillStyle = '#795548';
+      ctx.fillRect(tx+10|0, ty+18|0, 12, 10);
+      ctx.fillStyle = '#4CAF50';
+      ctx.beginPath();
+      ctx.arc(tx+16, ty+14, 8, 0, Math.PI*2);
+      ctx.fill();
+      ctx.fillStyle = '#66BB6A';
+      ctx.beginPath();
+      ctx.arc(tx+13, ty+11, 5, 0, Math.PI*2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(tx+19, ty+12, 5, 0, Math.PI*2);
+      ctx.fill();
+      break;
+
+    case 8: /* 화이트보드 */
+      ctx.fillStyle = '#ECEFF1';
+      ctx.fillRect(tx+2|0, ty+2|0, TILE-4, TILE-4);
+      ctx.strokeStyle = '#90A4AE';
+      ctx.strokeRect(tx+2|0, ty+2|0, TILE-4, TILE-4);
+      ctx.fillStyle = '#E74C3C';
+      ctx.fillRect(tx+6|0, ty+8|0, 12, 2);
+      ctx.fillStyle = '#3498DB';
+      ctx.fillRect(tx+6|0, ty+14|0, 16, 2);
+      ctx.fillStyle = '#2ECC71';
+      ctx.fillRect(tx+6|0, ty+20|0, 10, 2);
+      break;
+
+    case 9: /* 카페 카운터 */
+      ctx.fillStyle = '#5D4037';
+      ctx.fillRect(tx|0, ty+4|0, TILE, TILE-4);
+      ctx.fillStyle = '#795548';
+      ctx.fillRect(tx+2|0, ty+4|0, TILE-4, 4);
+      /* 커피컵 */
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(tx+12|0, ty+8|0, 8, 8);
+      ctx.fillStyle = '#6D4C41';
+      ctx.fillRect(tx+13|0, ty+9|0, 6, 5);
+      break;
+
+    case 10: /* 엘리베이터 */
+      ctx.fillStyle = '#90A4AE';
+      ctx.fillRect(tx|0, ty|0, TILE, TILE);
+      ctx.fillStyle = '#B0BEC5';
+      ctx.fillRect(tx+4|0, ty+2|0, TILE/2-2, TILE-4);
+      ctx.fillRect(tx+TILE/2+2|0, ty+2|0, TILE/2-6, TILE-4);
+      ctx.fillStyle = '#78909C';
+      ctx.fillRect(tx+TILE/2-1|0, ty+2|0, 2, TILE-4);
+      /* 화살표 */
+      ctx.fillStyle = '#4CAF50';
+      ctx.beginPath();
+      ctx.moveTo(tx+TILE/2, ty+6);
+      ctx.lineTo(tx+TILE/2-4, ty+12);
+      ctx.lineTo(tx+TILE/2+4, ty+12);
+      ctx.closePath();
+      ctx.fill();
+      break;
+
+    case 12: /* 카펫 */
+      ctx.fillStyle = '#D1C4E9';
+      ctx.fillRect(tx|0, ty|0, TILE, TILE);
+      ctx.fillStyle = 'rgba(179,157,219,0.3)';
+      if((col+row)%2===0) ctx.fillRect(tx|0, ty|0, TILE, TILE);
+      break;
+
+    case 13: /* 회의 테이블 */
+      ctx.fillStyle = '#4E342E';
+      ctx.fillRect(tx+2|0, ty+2|0, TILE-4, TILE-4);
+      ctx.fillStyle = '#6D4C41';
+      ctx.fillRect(tx+4|0, ty+4|0, TILE-8, TILE-8);
+      break;
+  }
+}
+
+/** 전체 맵 그리기 */
+function drawMap(sx, sy){
+  var startCol = Math.max(0, Math.floor(sx / TILE));
+  var endCol   = Math.min(MAP_COLS, Math.ceil((sx + W) / TILE) + 1);
+  var startRow = Math.max(0, Math.floor(sy / TILE));
+  var endRow   = Math.min(MAP_ROWS, Math.ceil((sy + H) / TILE) + 1);
+
+  for(var r = startRow; r < endRow; r++){
+    for(var c = startCol; c < endCol; c++){
+      drawTile(c, r, currentMap[r][c], sx, sy);
+    }
+  }
+}
+
+/* ============================================
+   [SECTION 8] 캐릭터 픽셀 렌더링 (100가지 스타일)
+   ============================================ */
+
+/**
+ * 캐릭터 그리기 — 16x24 픽셀 스프라이트를 캔버스에 직접 그림
+ * @param {Object} person — 캐릭터 데이터
+ * @param {number} sx, sy — 카메라 오프셋
+ */
+function drawPerson(person, sx, sy){
+  var px = Math.round(person.x - sx);
+  var py = Math.round(person.y - sy);
+  var s = 2; /* 픽셀 스케일 (16x24 → 32x48 실제 크기) */
+
+  /* 화면 밖 컬링 */
+  if(px + 40 < 0 || px - 10 > W || py + 50 < 0 || py - 10 > H) return;
+
+  /* 걷기 애니메이션 프레임 */
+  var f = person.frame; /* 0~3 */
+  var legOffset = 0;
+  var armOffset = 0;
+  if(person.moving){
+    legOffset = [0, -1, 0, 1][f];
+    armOffset = [0, 1, 0, -1][f];
+  }
+
+  /* 댄스 오프셋 */
+  var danceY = 0;
+  if(person.dancing){
+    danceY = Math.sin(tick * 0.2) * 3;
+    legOffset = Math.round(Math.sin(tick * 0.3) * 2);
+    armOffset = Math.round(Math.cos(tick * 0.3) * 2);
+  }
+
+  /* 점프 시 약간 올라감 */
+  py += danceY;
+
+  /* --- 그림자 --- */
+  ctx.fillStyle = 'rgba(0,0,0,0.15)';
+  ctx.beginPath();
+  ctx.ellipse(px + 8*s, py + 23*s - danceY, 6*s, 2*s, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  /* --- 머리카락 (뒷부분) --- */
+  if(person.hairStyle !== 'bald' && person.hairStyle !== 'buzz'){
+    ctx.fillStyle = person.hair;
+    if(person.hairStyle === 'long' || person.hairStyle === 'ponytail'){
+      pxRect(px+4*s, py+1*s, 8*s, 9*s);
+    } else if(person.hairStyle === 'afro'){
+      pxRect(px+2*s, py-1*s, 12*s, 10*s);
+    }
+  }
+
+  /* --- 다리 --- */
+  ctx.fillStyle = person.pants;
+  /* 왼쪽 다리 */
+  pxRect(px + (5+legOffset)*s, py + 17*s, 3*s, 5*s);
+  /* 오른쪽 다리 */
+  pxRect(px + (9-legOffset)*s, py + 17*s, 3*s, 5*s);
+
+  /* --- 신발 --- */
+  ctx.fillStyle = '#1A1A1A';
+  pxRect(px + (4+legOffset)*s, py + 22*s, 4*s, 2*s);
+  pxRect(px + (9-legOffset)*s, py + 22*s, 4*s, 2*s);
+
+  /* --- 몸통 --- */
+  ctx.fillStyle = person.shirt;
+  pxRect(px + 4*s, py + 9*s, 9*s, 8*s);
+
+  /* 셔츠 디테일 — 줄무늬/단색/포인트 (인덱스 기반) */
+  if(person.id % 3 === 0){
+    /* 줄무늬 */
+    ctx.fillStyle = 'rgba(255,255,255,0.2)';
+    pxRect(px+4*s, py+11*s, 9*s, 1*s);
+    pxRect(px+4*s, py+14*s, 9*s, 1*s);
+  } else if(person.id % 3 === 1){
+    /* 칼라 */
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    pxRect(px+5*s, py+9*s, 7*s, 2*s);
+  }
+
+  /* --- 팔 --- */
+  ctx.fillStyle = person.skin;
+  /* 왼팔 */
+  pxRect(px + (2+armOffset)*s, py + 10*s, 2*s, 6*s);
+  /* 오른팔 */
+  pxRect(px + (13-armOffset)*s, py + 10*s, 2*s, 6*s);
+
+  /* 소매 */
+  ctx.fillStyle = person.shirt;
+  pxRect(px + (2+armOffset)*s, py + 10*s, 2*s, 2*s);
+  pxRect(px + (13-armOffset)*s, py + 10*s, 2*s, 2*s);
+
+  /* --- 머리 (얼굴) --- */
+  ctx.fillStyle = person.skin;
+  pxRect(px + 4*s, py + 1*s, 8*s, 8*s);
+
+  /* --- 눈 --- */
+  ctx.fillStyle = '#222222';
+  if(person.dir === 2){ /* 뒤 */
+    /* 뒤돌아보면 눈 안 보임 */
+  } else if(person.dir === 1){ /* 왼 */
+    pxRect(px + 5*s, py + 4*s, s, 2*s);
+  } else if(person.dir === 3){ /* 오른 */
+    pxRect(px + 10*s, py + 4*s, s, 2*s);
+  } else { /* 앞 */
+    pxRect(px + 6*s, py + 4*s, s, 2*s);
+    pxRect(px + 10*s, py + 4*s, s, 2*s);
+    /* 눈 하이라이트 */
+    ctx.fillStyle = '#FFFFFF';
+    pxRect(px + 6*s, py + 4*s, s, s);
+    pxRect(px + 10*s, py + 4*s, s, s);
+  }
+
+  /* --- 입 --- */
+  if(person.dir !== 2){
+    ctx.fillStyle = '#CC6666';
+    if(person.bubble){
+      /* 말하는 중 — 입 크게 */
+      pxRect(px + 7*s, py + 7*s, 3*s, s);
+    } else {
+      /* 미소 */
+      pxRect(px + 7*s, py + 7*s, 2*s, s);
+    }
+  }
+
+  /* --- 볼터치 --- */
+  if(person.dir === 0){
+    ctx.fillStyle = 'rgba(255,150,150,0.3)';
+    pxRect(px + 4*s, py + 6*s, 2*s, s);
+    pxRect(px + 11*s, py + 6*s, 2*s, s);
+  }
+
+  /* --- 머리카락 (앞부분) --- */
+  ctx.fillStyle = person.hair;
+  switch(person.hairStyle){
+    case 'short':
+      pxRect(px+4*s, py+0*s, 8*s, 3*s);
+      pxRect(px+3*s, py+1*s, 2*s, 3*s);
+      pxRect(px+11*s, py+1*s, 2*s, 3*s);
+      break;
+    case 'long':
+      pxRect(px+3*s, py+0*s, 10*s, 3*s);
+      pxRect(px+3*s, py+1*s, 2*s, 7*s);
+      pxRect(px+12*s, py+1*s, 2*s, 7*s);
+      break;
+    case 'mohawk':
+      pxRect(px+6*s, py-2*s, 4*s, 4*s);
+      pxRect(px+7*s, py-3*s, 2*s, 2*s);
+      break;
+    case 'bun':
+      pxRect(px+4*s, py+0*s, 8*s, 2*s);
+      pxRect(px+6*s, py-2*s, 4*s, 3*s);
+      break;
+    case 'curly':
+      pxRect(px+3*s, py-1*s, 10*s, 4*s);
+      pxRect(px+2*s, py+1*s, 3*s, 4*s);
+      pxRect(px+12*s, py+1*s, 3*s, 4*s);
+      break;
+    case 'ponytail':
+      pxRect(px+4*s, py+0*s, 8*s, 3*s);
+      pxRect(px+11*s, py+2*s, 3*s, 8*s);
+      break;
+    case 'buzz':
+      pxRect(px+4*s, py+0*s, 8*s, 2*s);
+      break;
+    case 'side':
+      pxRect(px+3*s, py+0*s, 10*s, 3*s);
+      pxRect(px+3*s, py+1*s, 3*s, 5*s);
+      break;
+    case 'afro':
+      pxRect(px+2*s, py-2*s, 12*s, 5*s);
+      pxRect(px+1*s, py+0*s, 3*s, 5*s);
+      pxRect(px+12*s, py+0*s, 3*s, 5*s);
+      break;
+    case 'bald':
+      /* 없음 */
+      break;
+  }
+
+  /* --- 액세서리 --- */
+  switch(person.accessory){
+    case 'glasses':
+      ctx.fillStyle = '#333333';
+      if(person.dir === 0){
+        pxRect(px+5*s, py+4*s, 3*s, 2*s);
+        pxRect(px+9*s, py+4*s, 3*s, 2*s);
+        pxRect(px+8*s, py+4*s, s, s);
+      }
+      break;
+    case 'sunglasses':
+      ctx.fillStyle = '#1A1A1A';
+      if(person.dir === 0){
+        pxRect(px+5*s, py+3*s, 3*s, 3*s);
+        pxRect(px+9*s, py+3*s, 3*s, 3*s);
+        pxRect(px+8*s, py+4*s, s, s);
+      }
+      break;
+    case 'hat':
+      ctx.fillStyle = '#5D4037';
+      pxRect(px+2*s, py-1*s, 12*s, 2*s);
+      pxRect(px+4*s, py-4*s, 8*s, 4*s);
+      break;
+    case 'cap':
+      ctx.fillStyle = person.shirt;
+      pxRect(px+3*s, py-1*s, 11*s, 2*s);
+      pxRect(px+4*s, py-2*s, 8*s, 2*s);
+      break;
+    case 'headband':
+      ctx.fillStyle = '#E74C3C';
+      pxRect(px+4*s, py+1*s, 8*s, s);
+      break;
+    case 'earring':
+      ctx.fillStyle = '#FFD700';
+      pxRect(px+3*s, py+5*s, s, s);
+      break;
+    case 'mask':
+      ctx.fillStyle = '#FFFFFF';
+      if(person.dir === 0){
+        pxRect(px+5*s, py+6*s, 6*s, 3*s);
+      }
+      break;
+    case 'scarf':
+      ctx.fillStyle = '#E74C3C';
+      pxRect(px+4*s, py+8*s, 9*s, 2*s);
+      pxRect(px+6*s, py+10*s, 2*s, 3*s);
+      break;
+    case 'bowtie':
+      ctx.fillStyle = '#E74C3C';
+      pxRect(px+6*s, py+9*s, 4*s, 2*s);
+      ctx.fillStyle = '#C0392B';
+      pxRect(px+7*s, py+9*s, 2*s, 2*s);
+      break;
+  }
+
+  /* --- 선택 표시 --- */
+  if(person.selected){
+    ctx.strokeStyle = '#4ECDC4';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([4,3]);
+    ctx.strokeRect(px - 2, py - 6, 18*s, 26*s);
+    ctx.setLineDash([]);
+  }
+
+  /* --- 플레이어 표시 (삼각형 마커) --- */
+  if(person.isPlayer){
+    ctx.fillStyle = '#4ECDC4';
+    ctx.beginPath();
+    ctx.moveTo(px + 8*s, py - 10);
+    ctx.lineTo(px + 6*s, py - 4);
+    ctx.lineTo(px + 10*s, py - 4);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  /* --- 이름 태그 --- */
+  ctx.fillStyle = person.isPlayer ? '#4ECDC4' : 'rgba(255,255,255,0.8)';
+  ctx.font = 'bold 10px "Segoe UI", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(person.name, px + 8*s, py - 12);
+
+  /* --- 말풍선 --- */
+  if(person.bubble && person.bubble.timer > 0){
+    drawBubble(px + 8*s, py - 24, person.bubble.text, person.bubble.type);
+  }
+
+  /* --- 이모지 --- */
+  if(person.emoji && person.emoji.timer > 0){
+    ctx.font = '20px serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(person.emoji.char, px + 8*s, py - 30 - (30 - person.emoji.timer) * 0.5);
+  }
+}
+
+/** 말풍선 그리기 */
+function drawBubble(x, y, text, type){
+  ctx.font = '11px "Segoe UI", sans-serif';
+  var tw = ctx.measureText(text).width;
+  var bw = Math.min(tw + 16, 200);
+  var bh = 24;
+  var bx = x - bw/2;
+  var by = y - bh - 8;
+
+  /* 배경 */
+  ctx.fillStyle = type === 'dm' ? 'rgba(255,107,107,0.9)' : 'rgba(255,255,255,0.92)';
+  ctx.beginPath();
+  ctx.moveTo(bx+6, by);
+  ctx.lineTo(bx+bw-6, by);
+  ctx.quadraticCurveTo(bx+bw, by, bx+bw, by+6);
+  ctx.lineTo(bx+bw, by+bh-6);
+  ctx.quadraticCurveTo(bx+bw, by+bh, bx+bw-6, by+bh);
+  ctx.lineTo(x+5, by+bh);
+  ctx.lineTo(x, by+bh+6);
+  ctx.lineTo(x-3, by+bh);
+  ctx.lineTo(bx+6, by+bh);
+  ctx.quadraticCurveTo(bx, by+bh, bx, by+bh-6);
+  ctx.lineTo(bx, by+6);
+  ctx.quadraticCurveTo(bx, by, bx+6, by);
+  ctx.closePath();
+  ctx.fill();
+
+  /* 테두리 */
+  ctx.strokeStyle = type === 'dm' ? 'rgba(200,80,80,0.5)' : 'rgba(0,0,0,0.15)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  /* 텍스트 */
+  ctx.fillStyle = type === 'dm' ? '#FFFFFF' : '#333333';
+  ctx.textAlign = 'center';
+  /* 긴 텍스트 잘라내기 */
+  var displayText = text.length > 25 ? text.substring(0,24)+'…' : text;
+  ctx.fillText(displayText, x, by + 16);
+
+  /* DM 표시 */
+  if(type === 'dm'){
+    ctx.fillStyle = '#FFD700';
+    ctx.font = '8px sans-serif';
+    ctx.fillText('DM', bx + bw - 12, by + 10);
+  }
+}
+
+/* ============================================
+   [SECTION 9] 물리 & 충돌
+   ============================================ */
+
+/** 타일 충돌 검사 */
+function isSolid(col, row){
+  if(col < 0 || col >= MAP_COLS || row < 0 || row >= MAP_ROWS) return true;
+  return !!TILE_SOLID[currentMap[row][col]];
+}
+
+/** 캐릭터에 물리 적용 */
+function applyPhysics(person){
+  /* 중력 */
+  if(!person.onGround){
+    person.vy += GRAVITY * 0.3;
+  }
+
+  /* 위치 업데이트 */
+  var newX = person.x + person.vx;
+  var newY = person.y + person.vy;
+
+  /* X축 충돌 */
+  var colL = Math.floor(newX / TILE);
+  var colR = Math.floor((newX + person.width) / TILE);
+  var rowT = Math.floor(person.y / TILE);
+  var rowB = Math.floor((person.y + person.height) / TILE);
+
+  var blocked = false;
+  for(var r = rowT; r <= rowB; r++){
+    if(isSolid(colL, r) || isSolid(colR, r)){
+      blocked = true;
+      break;
+    }
+  }
+  if(!blocked){
+    person.x = newX;
+  } else {
+    person.vx = 0;
+  }
+
+  /* Y축 충돌 */
+  colL = Math.floor(person.x / TILE);
+  colR = Math.floor((person.x + person.width) / TILE);
+  rowT = Math.floor(newY / TILE);
+  rowB = Math.floor((newY + person.height) / TILE);
+
+  blocked = false;
+  for(var c = colL; c <= colR; c++){
+    if(isSolid(c, rowT) || isSolid(c, rowB)){
+      blocked = true;
+      break;
+    }
+  }
+  if(!blocked){
+    person.y = newY;
+    person.onGround = false;
+  } else {
+    if(person.vy > 0){
+      /* 바닥에 착지 */
+      person.y = Math.floor(person.y / TILE) * TILE;
+      person.onGround = true;
+    }
+    person.vy = 0;
+  }
+
+  /* 맵 경계 */
+  person.x = Math.max(0, Math.min(person.x, MAP_COLS * TILE - person.width));
+  person.y = Math.max(0, Math.min(person.y, MAP_ROWS * TILE - person.height));
+
+  /* 마찰 */
+  person.vx *= 0.85;
+  if(Math.abs(person.vx) < 0.1) person.vx = 0;
+}
+
+/* ============================================
+   [SECTION 10] NPC AI
+   ============================================ */
+
+var NPC_PHRASES = [
+  '커피 한잔 할까요?','오늘 미팅 몇 시에요?','점심 뭐 먹을까요?',
+  '이 프로젝트 진행 어때요?','주말에 뭐 해요?','코드 리뷰 부탁해요!',
+  '디자인 피드백 좀요~','서버 배포 완료!','좋은 아침이에요!',
+  '오늘 날씨 좋네요~','회의실 예약했어요','런치 같이 가요!',
+  '버그 찾았어요 ㅠ','PR 올렸습니다!','퇴근하고 치맥?',
+  '이거 어떻게 생각해요?','넵 확인했습니다!','LGTM 👍',
+  '잠깐 쉬었다 해요','화이팅입니다! 💪'
+];
+
+var NPC_EMOJIS = ['😀','😂','🎉','❤️','👍','🔥','💡','☕','🍕','✨','😎','🤔','👋','💪','🎵'];
+
+function updateNPC(npc){
+  npc.aiTimer--;
+
+  if(npc.aiTimer <= 0){
+    /* 상태 전환 */
+    var rand = Math.random();
+    if(rand < 0.4){
+      /* 걷기 */
+      npc.aiState = 'walk';
+      npc.aiTargetX = (5 + Math.random() * 50) * TILE;
+      npc.aiTargetY = (5 + Math.random() * 30) * TILE;
+      npc.aiTimer = 120 + Math.random() * 200;
+    } else if(rand < 0.7){
+      /* 멈춤 */
+      npc.aiState = 'idle';
+      npc.aiTimer = 60 + Math.random() * 180;
+      npc.moving = false;
+      npc.vx = 0;
+    } else if(rand < 0.85){
+      /* 말하기 */
+      npc.aiState = 'chat';
+      npc.aiTimer = 100 + Math.random() * 100;
+      npc.bubble = {
+        text: NPC_PHRASES[Math.floor(Math.random() * NPC_PHRASES.length)],
+        timer: 120,
+        type: 'all'
+      };
+      npc.moving = false;
+      npc.vx = 0;
+    } else {
+      /* 이모지 */
+      npc.aiState = 'idle';
+      npc.aiTimer = 80;
+      npc.emoji = {
+        char: NPC_EMOJIS[Math.floor(Math.random() * NPC_EMOJIS.length)],
+        timer: 60
+      };
+    }
+  }
+
+  /* 걷기 처리 */
+  if(npc.aiState === 'walk'){
+    var dx = npc.aiTargetX - npc.x;
+    var dy = npc.aiTargetY - npc.y;
+    var dist = Math.sqrt(dx*dx + dy*dy);
+
+    if(dist > 5){
+      npc.vx = (dx / dist) * MOVE_SPEED * 0.6;
+      npc.vy = 0;
+      npc.y += (dy / dist) * MOVE_SPEED * 0.6;
+      npc.moving = true;
+
+      /* 방향 */
+      if(Math.abs(dx) > Math.abs(dy)){
+        npc.dir = dx > 0 ? 3 : 1;
+      } else {
+        npc.dir = dy > 0 ? 0 : 2;
+      }
+
+      /* 걷기 애니메이션 */
+      npc.animTimer++;
+      if(npc.animTimer > 8){
+        npc.frame = (npc.frame + 1) % 4;
+        npc.animTimer = 0;
+      }
+    } else {
+      npc.aiState = 'idle';
+      npc.aiTimer = 60;
+      npc.moving = false;
+      npc.vx = 0;
+    }
+  }
+
+  /* 말풍선/이모지 타이머 */
+  if(npc.bubble){
+    npc.bubble.timer--;
+    if(npc.bubble.timer <= 0) npc.bubble = null;
+  }
+  if(npc.emoji){
+    npc.emoji.timer--;
+    if(npc.emoji.timer <= 0) npc.emoji = null;
+  }
+}
+
+/* ============================================
+   [SECTION 11] 플레이어 입력 처리
+   ============================================ */
+
+function updatePlayer(){
+  var p = player;
+  var moving = false;
+
+  /* 이동 */
+  if(keys['ArrowLeft'] || keys['KeyA']){
+    p.vx = -MOVE_SPEED;
+    p.dir = 1;
+    moving = true;
+  }
+  if(keys['ArrowRight'] || keys['KeyD']){
+    p.vx = MOVE_SPEED;
+    p.dir = 3;
+    moving = true;
+  }
+  if(keys['ArrowUp'] || keys['KeyW']){
+    p.y -= MOVE_SPEED;
+    p.dir = 2;
+    moving = true;
+  }
+  if(keys['ArrowDown'] || keys['KeyS']){
+    p.y += MOVE_SPEED;
+    p.dir = 0;
+    moving = true;
+  }
+
+  /* 점프 */
+  if(keys['Space'] && p.onGround){
+    p.vy = JUMP_FORCE;
+    p.onGround = false;
+    p.jumping = true;
+  }
+
+  p.moving = moving;
+  if(moving){
+    p.animTimer++;
+    if(p.animTimer > 6){
+      p.frame = (p.frame + 1) % 4;
+      p.animTimer = 0;
+    }
+  } else {
+    p.frame = 0;
+    p.animTimer = 0;
+  }
+
+  /* 말풍선 타이머 */
+  if(p.bubble){
+    p.bubble.timer--;
+    if(p.bubble.timer <= 0) p.bubble = null;
+  }
+  if(p.emoji){
+    p.emoji.timer--;
+    if(p.emoji.timer <= 0) p.emoji = null;
+  }
+}
+
+/* ============================================
+   [SECTION 12] 카메라
+   ============================================ */
+
+function updateCamera(){
+  /* 플레이어 추적 */
+  camera.targetX = player.x - W / (2 * camera.zoom) + 16;
+  camera.targetY = player.y - H / (2 * camera.zoom) + 24;
+
+  /* 부드러운 이동 */
+  camera.x += (camera.targetX - camera.x) * 0.08;
+  camera.y += (camera.targetY - camera.y) * 0.08;
+
+  /* 맵 경계 제한 */
+  var maxX = MAP_COLS * TILE - W / camera.zoom;
+  var maxY = MAP_ROWS * TILE - H / camera.zoom;
+  camera.x = Math.max(0, Math.min(camera.x, maxX));
+  camera.y = Math.max(0, Math.min(camera.y, maxY));
+}
+
+/* ============================================
+   [SECTION 13] 미니맵
+   ============================================ */
+
+var minimapCanvas = document.getElementById('minimapCanvas');
+var mctx = minimapCanvas.getContext('2d');
+minimapCanvas.width = 160;
+minimapCanvas.height = 120;
+
+function drawMinimap(){
+  var mw = minimapCanvas.width;
+  var mh = minimapCanvas.height;
+  var sx = mw / (MAP_COLS * TILE);
+  var sy = mh / (MAP_ROWS * TILE);
+
+  mctx.fillStyle = '#1a1a2e';
+  mctx.fillRect(0, 0, mw, mh);
+
+  /* 맵 타일 */
+  for(var r = 0; r < MAP_ROWS; r++){
+    for(var c = 0; c < MAP_COLS; c++){
+      var t = currentMap[r][c];
+      if(t === 0) continue;
+      mctx.fillStyle = t===3 ? 'rgba(100,200,255,0.4)' : t===1||t===12 ? '#D4C5A9' : '#78909C';
+      mctx.fillRect(c*TILE*sx|0, r*TILE*sy|0, Math.ceil(TILE*sx), Math.ceil(TILE*sy));
+    }
+  }
+
+  /* NPC 점 */
+  for(var i = 0; i < people.length; i++){
+    var p = people[i];
+    mctx.fillStyle = p.isPlayer ? '#4ECDC4' : '#FF6B6B';
+    var dotSize = p.isPlayer ? 4 : 2;
+    mctx.fillRect(p.x*sx|0, p.y*sy|0, dotSize, dotSize);
+  }
+
+  /* 카메라 뷰포트 */
+  mctx.strokeStyle = '#4ECDC4';
+  mctx.lineWidth = 1;
+  mctx.strokeRect(
+    camera.x*sx|0,
+    camera.y*sy|0,
+    W/camera.zoom*sx|0,
+    H/camera.zoom*sy|0
+  );
+}
+
+/* ============================================
+   [SECTION 14] 채팅 / 메시지 시스템
+   ============================================ */
+
+var chatMode = 'all'; /* all, dm, group */
+var dmTarget = null;   /* DM 대상 */
+var chatMessages = [];
+var groupTargets = []; /* 그룹 대상 목록 */
+
+/** 메시지 전송 */
+function sendMessage(text){
+  if(!text || text.trim() === '') return;
+  text = text.trim();
+
+  var msg = {
+    from: player.name,
+    fromId: 0,
+    text: text,
+    time: new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}),
+    type: chatMode,
+    targetName: null,
+    targetIds: []
+  };
+
+  if(chatMode === 'dm' && dmTarget !== null){
+    msg.type = 'dm';
+    msg.targetName = people[dmTarget].name;
+    msg.targetIds = [dmTarget];
+
+    /* DM 대상에게 말풍선 반응 */
+    setTimeout(function(){
+      people[dmTarget].bubble = {
+        text: NPC_PHRASES[Math.floor(Math.random()*NPC_PHRASES.length)],
+        timer: 150,
+        type: 'dm'
+      };
+    }, 800 + Math.random()*1200);
+
+  } else if(chatMode === 'group' && groupTargets.length > 0){
+    msg.type = 'group';
+    msg.targetIds = groupTargets.slice();
+    msg.targetName = groupTargets.map(function(id){return people[id].name}).join(', ');
+  }
+
+  chatMessages.push(msg);
+
+  /* 플레이어 말풍선 */
+  player.bubble = { text: text, timer: 120, type: msg.type };
+
+  /* 채팅 UI 업데이트 */
+  renderChatMessages();
+
+  /* 전체 메시지면 근처 NPC가 반응 */
+  if(chatMode === 'all'){
+    for(var i = 1; i < people.length; i++){
+      var d = Math.sqrt(Math.pow(people[i].x-player.x,2)+Math.pow(people[i].y-player.y,2));
+      if(d < 200 && Math.random() < 0.3){
+        (function(idx){
+          setTimeout(function(){
+            people[idx].emoji = {
+              char: NPC_EMOJIS[Math.floor(Math.random()*NPC_EMOJIS.length)],
+              timer: 80
+            };
+          }, 500 + Math.random()*2000);
+        })(i);
+      }
+    }
+  }
+}
+
+/** 채팅 메시지 렌더링 */
+function renderChatMessages(){
+  var container = document.getElementById('chatMessages');
+  container.innerHTML = '';
+
+  var filtered = chatMessages;
+  if(chatMode === 'dm'){
+    filtered = chatMessages.filter(function(m){return m.type==='dm'});
+  } else if(chatMode === 'group'){
+    filtered = chatMessages.filter(function(m){return m.type==='group'});
+  }
+
+  /* 최근 50개만 표시 */
+  var start = Math.max(0, filtered.length - 50);
+  for(var i = start; i < filtered.length; i++){
+    var m = filtered[i];
+    var div = document.createElement('div');
+    div.className = 'msg ' + (m.fromId === 0 ? 'mine' : 'other');
+
+    var nameHtml = '<div class="name">' + m.from;
+    if(m.type === 'dm') nameHtml += '<span class="dm-tag">DM → ' + m.targetName + '</span>';
+    else if(m.type === 'group') nameHtml += '<span class="dm-tag">그룹</span>';
+    nameHtml += ' <span style="opacity:.4;font-weight:400">' + m.time + '</span></div>';
+
+    div.innerHTML = nameHtml + m.text;
+    container.appendChild(div);
+  }
+  container.scrollTop = container.scrollHeight;
+}
+
+/* ============================================
+   [SECTION 15] 사람 목록 UI
+   ============================================ */
+
+function renderPeopleList(){
+  var container = document.getElementById('pListInner');
+  container.innerHTML = '';
+
+  for(var i = 0; i < people.length; i++){
+    var p = people[i];
+    var item = document.createElement('div');
+    item.className = 'person-item';
+    item.setAttribute('data-id', i);
+
+    /* 미니 아바타 (캔버스로 그리기) */
+    var ac = document.createElement('canvas');
+    ac.width = 28; ac.height = 28;
+    ac.className = 'avatar-preview';
+    var actx = ac.getContext('2d');
+    actx.fillStyle = p.shirt;
+    actx.fillRect(4, 14, 20, 14);
+    actx.fillStyle = p.skin;
+    actx.fillRect(6, 2, 16, 14);
+    actx.fillStyle = p.hair;
+    actx.fillRect(6, 0, 16, 6);
+    actx.fillStyle = '#222';
+    actx.fillRect(10, 7, 2, 3);
+    actx.fillRect(16, 7, 2, 3);
+
+    var nameSpan = document.createElement('span');
+    nameSpan.className = 'pname';
+    nameSpan.textContent = (p.isPlayer ? '⭐ ' : '') + p.name;
+
+    item.appendChild(ac);
+    item.appendChild(nameSpan);
+
+    if(!p.isPlayer){
+      var dmBtn = document.createElement('span');
+      dmBtn.className = 'dm-btn';
+      dmBtn.textContent = 'DM';
+      dmBtn.setAttribute('data-id', i);
+      item.appendChild(dmBtn);
+    }
+
+    container.appendChild(item);
+  }
+}
+
+/* ============================================
+   [SECTION 16] 클릭으로 NPC 선택
+   ============================================ */
+
+var selectedNPC = null;
+
+function handleCanvasClick(mx, my){
+  var worldX = mx / camera.zoom + camera.x;
+  var worldY = my / camera.zoom + camera.y;
+
+  /* 기존 선택 해제 */
+  if(selectedNPC !== null && people[selectedNPC]){
+    people[selectedNPC].selected = false;
+  }
+  selectedNPC = null;
+
+  /* NPC 클릭 검사 (역순 — 위에 그려진 것부터) */
+  for(var i = people.length - 1; i >= 0; i--){
+    var p = people[i];
+    if(p.isPlayer) continue;
+    if(worldX >= p.x - 4 && worldX <= p.x + 36 &&
+       worldY >= p.y - 10 && worldY <= p.y + 50){
+      p.selected = true;
+      selectedNPC = i;
+      setDmTarget(i);
+      break;
+    }
+  }
+}
+
+/** DM 대상 설정 */
+function setDmTarget(id){
+  dmTarget = id;
+  chatMode = 'dm';
+
+  /* UI 업데이트 */
+  document.getElementById('chatPanel').classList.add('open');
+  document.getElementById('chatTarget').style.display = 'block';
+  document.getElementById('targetName').textContent = people[id].name;
+  document.getElementById('msgInput').placeholder = people[id].name + '에게 DM...';
+  document.getElementById('msgInput').focus();
+
+  /* 탭 활성화 */
+  var tabs = document.querySelectorAll('#chatHead .tab');
+  tabs.forEach(function(t){t.classList.remove('active')});
+  tabs[1].classList.add('active');
+
+  renderChatMessages();
+}
+
+/* ============================================
+   [SECTION 17] 터치 입력 (모바일)
+   ============================================ */
+
+var touchStartX = 0, touchStartY = 0;
+var touchJoystick = false;
+var touchDirX = 0, touchDirY = 0;
+
+canvas.addEventListener('touchstart', function(e){
+  e.preventDefault();
+  var t = e.touches[0];
+  touchStartX = t.clientX;
+  touchStartY = t.clientY;
+  touchJoystick = true;
+}, {passive: false});
+
+canvas.addEventListener('touchmove', function(e){
+  e.preventDefault();
+  if(!touchJoystick) return;
+  var t = e.touches[0];
+  touchDirX = (t.clientX - touchStartX) * 0.08;
+  touchDirY = (t.clientY - touchStartY) * 0.08;
+}, {passive: false});
+
+canvas.addEventListener('touchend', function(e){
+  touchJoystick = false;
+  touchDirX = 0;
+  touchDirY = 0;
+  player.moving = false;
+});
+
+function applyTouchInput(){
+  if(!touchJoystick) return;
+  if(Math.abs(touchDirX) > 0.5 || Math.abs(touchDirY) > 0.5){
+    player.vx = Math.max(-MOVE_SPEED, Math.min(MOVE_SPEED, touchDirX));
+    player.y += Math.max(-MOVE_SPEED, Math.min(MOVE_SPEED, touchDirY));
+    player.moving = true;
+
+    if(Math.abs(touchDirX) > Math.abs(touchDirY)){
+      player.dir = touchDirX > 0 ? 3 : 1;
+    } else {
+      player.dir = touchDirY > 0 ? 0 : 2;
+    }
+
+    player.animTimer++;
+    if(player.animTimer > 6){
+      player.frame = (player.frame+1) % 4;
+      player.animTimer = 0;
+    }
+  }
+}
+
+/* ============================================
+   [SECTION 18] 메인 게임 루프
+   ============================================ */
+
+function gameLoop(time){
+  requestAnimationFrame(gameLoop);
+
+  dt = time - lastTime;
+  lastTime = time;
+  tick++;
+
+  /* --- 입력 --- */
+  updatePlayer();
+  applyTouchInput();
+
+  /* --- 물리 --- */
+  applyPhysics(player);
+
+  /* --- NPC 업데이트 --- */
+  for(var i = 1; i < people.length; i++){
+    updateNPC(people[i]);
+    applyPhysics(people[i]);
+  }
+
+  /* --- 카메라 --- */
+  updateCamera();
+
+  /* --- 렌더링 시작 --- */
+  ctx.clearRect(0, 0, W, H);
+
+  /* 줌 적용 */
+  ctx.save();
+  ctx.scale(camera.zoom, camera.zoom);
+
+  var sx = camera.x;
+  var sy = camera.y;
+
+  /* 배경 (통유리 밖) */
+  ctx.save();
+  ctx.setTransform(1,0,0,1,0,0); /* 줌 무시 — 배경은 풀스크린 */
+  drawBackground(camera.x, camera.y);
+  ctx.restore();
+
+  /* 타일맵 */
+  drawMap(sx, sy);
+
+  /* 캐릭터 (Y 정렬 — 아래쪽이 위에 그려짐) */
+  people.sort(function(a,b){return a.y - b.y});
+  for(var pi = 0; pi < people.length; pi++){
+    drawPerson(people[pi], sx, sy);
+  }
+
+  /* 통유리 오버레이 (건물 테두리 위에 반투명 빛 효과) */
+  drawGlassOverlay(sx, sy);
+
+  ctx.restore();
+
+  /* --- 미니맵 (10프레임마다) --- */
+  if(tick % 10 === 0) drawMinimap();
+
+  /* --- HUD 업데이트 --- */
+  if(tick % 15 === 0){
+    document.getElementById('posInfo').textContent =
+      'x:' + Math.round(player.x/TILE) + ' y:' + Math.round(player.y/TILE) +
+      ' | ' + people.length + '명 온라인 | ' + currentFloor + 'F';
+  }
+}
+
+/** 통유리 반사 오버레이 */
+function drawGlassOverlay(sx, sy){
+  var bL=3, bR=56, bT=2, bB=37;
+
+  /* 왼쪽 유리벽 빛 반사 */
+  var lx = bL * TILE - sx;
+  var ty2 = bT * TILE - sy;
+  var by2 = bB * TILE - sy;
+  var grd = ctx.createLinearGradient(lx, ty2, lx+60, ty2);
+  grd.addColorStop(0, 'rgba(255,255,255,0.08)');
+  grd.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = grd;
+  ctx.fillRect(lx, ty2, 60, by2-ty2);
+
+  /* 오른쪽 유리벽 빛 반사 */
+  var rx = bR * TILE - sx;
+  grd = ctx.createLinearGradient(rx, ty2, rx-60, ty2);
+  grd.addColorStop(0, 'rgba(255,255,255,0.08)');
+  grd.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = grd;
+  ctx.fillRect(rx-60, ty2, 60, by2-ty2);
+
+  /* 대각선 빛줄기 */
+  ctx.save();
+  ctx.globalAlpha = 0.03 + Math.sin(tick*0.01)*0.02;
+  ctx.fillStyle = '#FFFFFF';
+  ctx.beginPath();
+  ctx.moveTo(lx+100, ty2);
+  ctx.lineTo(lx+200, ty2);
+  ctx.lineTo(lx, by2);
+  ctx.lineTo(lx-100, by2);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+/* ============================================
+   [SECTION 19] 키보드 이벤트
+   ============================================ */
+
+document.addEventListener('keydown', function(e){
+  keys[e.code] = true;
+
+  /* Enter — 채팅 토글 / 전송 */
+  if(e.code === 'Enter'){
+    var panel = document.getElementById('chatPanel');
+    var input = document.getElementById('msgInput');
+    if(panel.classList.contains('open')){
+      if(document.activeElement === input){
+        sendMessage(input.value);
+        input.value = '';
+      } else {
+        input.focus();
+      }
+    } else {
+      panel.classList.add('open');
+      setTimeout(function(){input.focus()}, 100);
+    }
+    e.preventDefault();
+  }
+
+  /* Escape — 패널 닫기 */
+  if(e.code === 'Escape'){
+    document.getElementById('chatPanel').classList.remove('open');
+    document.getElementById('peopleList').classList.remove('open');
+    document.getElementById('help').style.display = 'none';
+    document.getElementById('overlay').style.display = 'none';
+  }
+
+  /* Tab — 사람 목록 */
+  if(e.code === 'Tab'){
+    e.preventDefault();
+    document.getElementById('peopleList').classList.toggle('open');
+  }
+
+  /* E — 이모지 */
+  if(e.code === 'KeyE' && document.activeElement.tagName !== 'INPUT'){
+    player.emoji = {
+      char: NPC_EMOJIS[Math.floor(Math.random()*NPC_EMOJIS.length)],
+      timer: 80
+    };
+  }
+
+  /* 1,2,3 — 층 이동 */
+  if(document.activeElement.tagName !== 'INPUT'){
+    if(e.code === 'Digit1') switchFloor(15);
+    if(e.code === 'Digit2') switchFloor(14);
+    if(e.code === 'Digit3') switchFloor(13);
+  }
+});
+
+document.addEventListener('keyup', function(e){
+  keys[e.code] = false;
+});
+
+/* 캔버스 클릭 */
+canvas.addEventListener('click', function(e){
+  handleCanvasClick(e.clientX, e.clientY);
+});
+
+/* ============================================
+   [SECTION 20] UI 이벤트 바인딩
+   ============================================ */
+
+/* --- 채팅 전송 버튼 --- */
+document.getElementById('sendBtn').addEventListener('click', function(){
+  var input = document.getElementById('msgInput');
+  sendMessage(input.value);
+  input.value = '';
+  input.focus();
+});
+
+/* --- 채팅 탭 --- */
+document.querySelectorAll('#chatHead .tab').forEach(function(tab){
+  tab.addEventListener('click', function(){
+    document.querySelectorAll('#chatHead .tab').forEach(function(t){t.classList.remove('active')});
+    this.classList.add('active');
+    chatMode = this.getAttribute('data-mode');
+    if(chatMode !== 'dm'){
+      dmTarget = null;
+      document.getElementById('chatTarget').style.display = 'none';
+      document.getElementById('msgInput').placeholder = chatMode==='group' ? '그룹 메시지...' : '메시지 입력... (Enter 전송)';
+    }
+    renderChatMessages();
+  });
+});
+
+/* --- 채팅 닫기 --- */
+document.getElementById('closeChat').addEventListener('click', function(){
+  document.getElementById('chatPanel').classList.remove('open');
+});
+
+/* --- DM 타겟 해제 --- */
+document.getElementById('clearTarget').addEventListener('click', function(){
+  dmTarget = null;
+  chatMode = 'all';
+  document.getElementById('chatTarget').style.display = 'none';
+  document.getElementById('msgInput').placeholder = '메시지 입력... (Enter 전송)';
+  var tabs = document.querySelectorAll('#chatHead .tab');
+  tabs.forEach(function(t){t.classList.remove('active')});
+  tabs[0].classList.add('active');
+  if(selectedNPC !== null && people[selectedNPC]) people[selectedNPC].selected = false;
+  selectedNPC = null;
+  renderChatMessages();
+});
+
+/* --- 사람 목록 DM 클릭 --- */
+document.getElementById('pListInner').addEventListener('click', function(e){
+  var btn = e.target;
+  if(btn.classList.contains('dm-btn')){
+    var id = parseInt(btn.getAttribute('data-id'));
+    setDmTarget(id);
+    document.getElementById('peopleList').classList.remove('open');
+  }
+});
+
+/* --- 툴바 버튼들 --- */
+document.getElementById('tbPeople').addEventListener('click', function(){
+  document.getElementById('peopleList').classList.toggle('open');
+});
+document.getElementById('tbChat').addEventListener('click', function(){
+  document.getElementById('chatPanel').classList.toggle('open');
+});
+document.getElementById('tbEmoji').addEventListener('click', function(){
+  player.emoji = {
+    char: NPC_EMOJIS[Math.floor(Math.random()*NPC_EMOJIS.length)],
+    timer: 80
+  };
+});
+document.getElementById('tbDance').addEventListener('click', function(){
+  player.dancing = !player.dancing;
+  this.classList.toggle('on', player.dancing);
+});
+document.getElementById('tbHelp').addEventListener('click', function(){
+  document.getElementById('help').style.display = 'block';
+  document.getElementById('overlay').style.display = 'block';
+});
+document.getElementById('closeHelp').addEventListener('click', function(){
+  document.getElementById('help').style.display = 'none';
+  document.getElementById('overlay').style.display = 'none';
+});
+document.getElementById('overlay').addEventListener('click', function(){
+  document.getElementById('help').style.display = 'none';
+  document.getElementById('overlay').style.display = 'none';
+});
+document.getElementById('tbZoomIn').addEventListener('click', function(){
+  camera.zoom = Math.min(camera.maxZoom, camera.zoom + 0.2);
+});
+document.getElementById('tbZoomOut').addEventListener('click', function(){
+  camera.zoom = Math.max(camera.minZoom, camera.zoom - 0.2);
+});
+
+/* --- 층 버튼 --- */
+document.querySelectorAll('.floor-btn').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    var f = parseInt(this.getAttribute('data-floor'));
+    switchFloor(f);
+  });
+});
+
+/** 층 전환 */
+function switchFloor(floor){
+  currentFloor = floor;
+  currentMap = maps[floor];
+
+  /* 버튼 활성화 */
+  document.querySelectorAll('.floor-btn').forEach(function(b){
+    b.classList.toggle('active', parseInt(b.getAttribute('data-floor')) === floor);
+  });
+
+  /* NPC 재배치 */
+  for(var i = 1; i < people.length; i++){
+    people[i].x = (5 + Math.random() * 50) * TILE;
+    people[i].y = (5 + Math.random() * 30) * TILE;
+    people[i].aiState = 'idle';
+    people[i].aiTimer = 30;
+  }
+}
+
+/* ============================================
+   [SECTION 21] 초기화 & 시작
+   ============================================ */
+
+initPeople();
+initBgElements();
+renderPeopleList();
+
+/* 시작 위치 — 건물 중앙 */
+player.x = 30 * TILE;
+player.y = 20 * TILE;
+
+/* 게임 루프 시작 */
+requestAnimationFrame(gameLoop);
+
+/* 콘솔 안내 */
+console.log('%c🏢 PIXEL OFFICE 로드 완료!', 'color:#4ECDC4;font-size:16px;font-weight:bold');
+console.log('WASD/화살표: 이동 | Enter: 채팅 | Space: 점프 | E: 이모지 | Tab: 사람 목록 | 1~3: 층 이동');
+
+})();
+</script>
+</body>
+</html>
