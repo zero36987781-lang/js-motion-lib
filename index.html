@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>Pixel Office — 15F Ocean View</title>
+<title>Pixel Office — 15F Ocean View Workspace</title>
 <style>
 /* ============================================
-   [STYLE-1] 리셋 & 기본
+   [STYLE-1] 리셋 & 기본 레이아웃
    ============================================ */
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100%;height:100%;overflow:hidden;background:#0d1117;font-family:'Segoe UI','맑은 고딕',sans-serif;user-select:none}
@@ -30,9 +30,9 @@ canvas#game{display:block;position:fixed;top:0;left:0;width:100%;height:100%;ima
 #tooltip .tloc{color:rgba(255,255,255,.4);font-size:9px}
 
 /* ============================================
-   [STYLE-4] 채팅 패널
+   [STYLE-4] 채팅 패널 (우측 슬라이드)
    ============================================ */
-#chatP{position:fixed;right:0;top:34px;width:280px;height:calc(100% - 34px);background:rgba(13,17,23,.94);backdrop-filter:blur(12px);border-left:1px solid rgba(255,255,255,.08);z-index:90;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s}
+#chatP{position:fixed;right:0;top:34px;width:300px;height:calc(100% - 34px);background:rgba(13,17,23,.94);backdrop-filter:blur(12px);border-left:1px solid rgba(255,255,255,.08);z-index:90;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s}
 #chatP.open{transform:translateX(0)}
 #chatH{padding:7px 10px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:5px}
 .ct{padding:2px 9px;border-radius:10px;font-size:10px;color:rgba(255,255,255,.35);cursor:pointer;border:1px solid transparent;transition:.15s}
@@ -54,18 +54,35 @@ canvas#game{display:block;position:fixed;top:0;left:0;width:100%;height:100%;ima
 #chatIn button{padding:5px 12px;border:none;border-radius:6px;background:#4ECDC4;color:#000;font-weight:700;font-size:11px;cursor:pointer}
 
 /* ============================================
-   [STYLE-5] 하단 툴바
+   [STYLE-5] 사람 목록 패널 (좌측 슬라이드)
+   ============================================ */
+#pplP{position:fixed;left:0;top:34px;width:230px;height:calc(100% - 34px);background:rgba(13,17,23,.94);backdrop-filter:blur(12px);border-right:1px solid rgba(255,255,255,.08);z-index:90;overflow-y:auto;transform:translateX(-100%);transition:transform .25s;padding:8px}
+#pplP.open{transform:translateX(0)}
+#pplP h3{color:#fff;font-size:12px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:6px}
+#pplP::-webkit-scrollbar{width:3px}
+#pplP::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:2px}
+.pi{display:flex;align-items:center;gap:7px;padding:4px 6px;border-radius:5px;cursor:pointer;transition:.12s;margin-bottom:1px}
+.pi:hover{background:rgba(78,205,196,.12)}
+.pi canvas{border-radius:3px}
+.pi .pn{color:rgba(255,255,255,.75);font-size:11px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pi .ps{color:rgba(255,255,255,.35);font-size:9px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pi .dm{font-size:9px;color:#4ECDC4;cursor:pointer;padding:1px 5px;border:1px solid #4ECDC4;border-radius:3px;white-space:nowrap}
+.pi .sel{font-size:9px;color:#FFD93D;cursor:pointer;padding:1px 5px;border:1px solid #FFD93D;border-radius:3px;white-space:nowrap;margin-right:2px}
+
+/* ============================================
+   [STYLE-6] 하단 툴바
    ============================================ */
 #bar{position:fixed;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:100}
 .bb{width:38px;height:38px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:rgba(0,0,0,.45);backdrop-filter:blur(6px);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s}
 .bb:hover{background:rgba(78,205,196,.3);border-color:#4ECDC4}
 .bb:active{transform:scale(.92)}
+.bb.on{background:rgba(78,205,196,.4);border-color:#4ECDC4}
 
 /* ============================================
-   [STYLE-6] 도움말
+   [STYLE-7] 도움말 모달
    ============================================ */
 #helpO{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:198;display:none}
-#helpM{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(13,17,23,.96);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:24px;color:#fff;z-index:199;max-width:400px;width:90%;display:none}
+#helpM{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(13,17,23,.96);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:24px;color:#fff;z-index:199;max-width:420px;width:92%;display:none}
 #helpM h2{font-size:16px;margin-bottom:12px;color:#4ECDC4}
 #helpM p{font-size:11px;line-height:1.9;color:rgba(255,255,255,.65);margin-bottom:6px}
 #helpM kbd{padding:1px 5px;border-radius:3px;background:rgba(255,255,255,.12);font-size:10px}
@@ -74,7 +91,9 @@ canvas#game{display:block;position:fixed;top:0;left:0;width:100%;height:100%;ima
 </head>
 <body>
 
-<!-- [HTML-1] 상단 HUD -->
+<!-- ============================================
+     [HTML-1] 상단 HUD
+     ============================================ -->
 <div id="hud">
   <div class="logo">PIXEL<span>OFFICE</span></div>
   <button class="fbtn on" data-f="15">15F 라운지</button>
@@ -83,21 +102,28 @@ canvas#game{display:block;position:fixed;top:0;left:0;width:100%;height:100%;ima
   <span id="info">100명 | 15F</span>
 </div>
 
-<!-- [HTML-2] 호버 툴팁 -->
+<!-- ============================================
+     [HTML-2] 호버 툴팁
+     ============================================ -->
 <div id="tooltip">
   <div class="tname"></div>
   <div class="tstate"></div>
   <div class="tloc"></div>
 </div>
 
-<!-- [HTML-3] 캔버스 -->
+<!-- ============================================
+     [HTML-3] 메인 캔버스
+     ============================================ -->
 <canvas id="game"></canvas>
 
-<!-- [HTML-4] 채팅 패널 -->
+<!-- ============================================
+     [HTML-4] 채팅 패널 (우측)
+     ============================================ -->
 <div id="chatP">
   <div id="chatH">
     <div class="ct on" data-m="all">전체</div>
     <div class="ct" data-m="dm">1:1</div>
+    <div class="ct" data-m="group">그룹</div>
     <span id="chatX">&times;</span>
   </div>
   <div id="chatTgt"><em id="tgtN"></em>에게 DM <u id="tgtC">취소</u></div>
@@ -108,85 +134,143 @@ canvas#game{display:block;position:fixed;top:0;left:0;width:100%;height:100%;ima
   </div>
 </div>
 
-<!-- [HTML-5] 하단 툴바 -->
+<!-- ============================================
+     [HTML-5] 사람 목록 패널 (좌측)
+     ============================================ -->
+<div id="pplP">
+  <h3>👥 사람 목록 (<span id="pplCnt">0</span>명)</h3>
+  <div id="pplList"></div>
+</div>
+
+<!-- ============================================
+     [HTML-6] 하단 툴바
+     ============================================ -->
 <div id="bar">
+  <button class="bb" id="bPpl" title="사람 목록">👥</button>
   <button class="bb" id="bChat" title="채팅">💬</button>
+  <button class="bb" id="bEmoji" title="이모지">😀</button>
+  <button class="bb" id="bDance" title="댄스">💃</button>
   <button class="bb" id="bUp" title="위로 보기">🔼</button>
   <button class="bb" id="bDown" title="아래로 보기">🔽</button>
   <button class="bb" id="bZoomIn" title="확대">➕</button>
   <button class="bb" id="bZoomOut" title="축소">➖</button>
+  <button class="bb" id="bReset" title="리셋">🔄</button>
   <button class="bb" id="bHelp" title="도움말">❓</button>
 </div>
 
-<!-- [HTML-6] 도움말 -->
+<!-- ============================================
+     [HTML-7] 도움말 모달
+     ============================================ -->
 <div id="helpO"></div>
 <div id="helpM">
   <span class="hx" id="hx">&times;</span>
-  <h2>조작법</h2>
-  <p>🖱️ <b>클릭</b> — 사람 선택/이동 지점 지정</p>
+  <h2>🎮 조작법</h2>
+  <p>🖱️ <b>클릭</b> — 사람 선택 / 이동 지점 지정</p>
+  <p>🖱️ <b>더블클릭</b> — 선택 사람에게 DM 전송</p>
+  <p>🖱️ <b>호버</b> — 사람 상태 표시 (이름/상태/위치)</p>
+  <p>🖱️ <b>휠</b> — 줌 인/아웃</p>
   <p><kbd>W</kbd><kbd>S</kbd> 또는 <kbd>↑</kbd><kbd>↓</kbd> — 뷰 올려보기/내려보기</p>
   <p><kbd>A</kbd><kbd>D</kbd> 또는 <kbd>←</kbd><kbd>→</kbd> — 뷰 좌우 이동</p>
-  <p><kbd>Enter</kbd> — 채팅 열기/전송</p>
-  <p><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> — 층 이동</p>
+  <p><kbd>Enter</kbd> — 채팅 열기 / 메시지 전송</p>
+  <p><kbd>E</kbd> — 이모지 표시</p>
+  <p><kbd>Tab</kbd> — 사람 목록 토글</p>
+  <p><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> — 층 이동 (15F/14F/13F)</p>
   <p><kbd>+</kbd><kbd>-</kbd> — 줌 인/아웃</p>
-  <p>🖱️ <b>호버</b> — 사람 상태 표시</p>
-  <p>🖱️ <b>더블클릭</b> — 선택 사람에게 DM</p>
+  <p><kbd>Esc</kbd> — 패널 닫기</p>
+  <p>📱 모바일: 터치 드래그 뷰이동, 탭 선택/이동</p>
 </div>
 
 <script>
-/* ╔══════════════════════════════════════════════════════════════╗
-   ║  PIXEL OFFICE — 15층 통유리 오피스 내부 뷰                    ║
-   ║  크루즈 항구 & 언덕 배경 / 100명 / 3층 / 물리 / 메시지       ║
-   ╚══════════════════════════════════════════════════════════════╝ */
+/* ╔══════════════════════════════════════════════════════════════════╗
+   ║  PIXEL OFFICE — 15층 통유리 오피스 / 크루즈 항구 뷰              ║
+   ║  100명 캐릭터 / 3층 / 물리엔진 / 메시지 / 호버 상태 표시         ║
+   ║  이케아 스타일 가구 / 뷰 이동 / 세밀 주석                        ║
+   ╚══════════════════════════════════════════════════════════════════╝ */
 (function(){
 "use strict";
 
 /* ============================================
-   [SEC-1] 캔버스 초기화
+   [SEC-1] 캔버스 & 기본 초기화
    ============================================ */
-var cv=document.getElementById('game'),
-    cx=cv.getContext('2d'),
-    W,H;
-function resize(){W=cv.width=innerWidth;H=cv.height=innerHeight}
+var cv = document.getElementById('game');
+var cx = cv.getContext('2d');
+var W, H;
+
+/** 캔버스 크기를 브라우저에 맞춤 */
+function resize(){ W = cv.width = innerWidth; H = cv.height = innerHeight; }
 resize();
-window.addEventListener('resize',resize);
+window.addEventListener('resize', resize);
 
 /* ============================================
    [SEC-2] 전역 상수 & 변수
    ============================================ */
-var TICK=0,
-    /* 뷰 컨트롤 */
-    viewY=0.5,        /* 0=위(하늘많이)  1=아래(바닥많이) — 기본 0.5 */
-    viewX=0.5,        /* 0=좌  1=우 — 기본 중앙 */
-    viewZoom=1.0,
-    /* 층 */
-    curFloor=15,
-    /* 선택된 사람 */
-    selPerson=null,
-    hoverPerson=null,
-    /* 마우스 */
-    mx=0,my=0,
-    /* 채팅 */
-    chatMode='all',dmTgt=null,chatMsgs=[];
+var TICK = 0;                /* 프레임 카운터 */
+
+/* --- 뷰 컨트롤 --- */
+var viewY   = 0.5;          /* 0=위(하늘多) ~ 1=아래(바닥多) */
+var viewX   = 0.5;          /* 0=좌 ~ 1=우 */
+var viewZoom = 1.0;         /* 줌 배율 */
+
+/* --- 현재 층 --- */
+var curFloor = 15;
+
+/* --- 선택 / 호버 --- */
+var selPerson   = null;     /* 클릭으로 선택된 사람 */
+var hoverPerson = null;     /* 마우스 올린 사람 */
+
+/* --- 마우스 좌표 --- */
+var mx = 0, my = 0;
+
+/* --- 채팅 --- */
+var chatMode = 'all';       /* all | dm | group */
+var dmTgt = null;            /* DM 대상 ID */
+var groupTgts = [];          /* 그룹 대상 ID 배열 */
+var chatMsgs = [];           /* 메시지 히스토리 */
+
+/* --- 댄스 모드 --- */
+var danceMode = false;
 
 /* ============================================
-   [SEC-3] 색상 팔레트 — 100가지 캐릭터 조합
+   [SEC-3] 색상 팔레트 — 100가지 조합용
    ============================================ */
-var SKINS=['#FFDBB5','#F5C5A3','#D2956A','#C68642','#8D5524','#FFCBA4','#E8B88A','#A0724A','#F9E0C0','#D4A97A'];
-var HAIRS=['#2C1B0E','#5C3317','#8B4513','#D4A44C','#F5D060','#C0392B','#E74C3C','#8E44AD','#2980B9','#1ABC9C'];
-var SHIRTS=['#E74C3C','#3498DB','#2ECC71','#F39C12','#9B59B6','#1ABC9C','#E67E22','#EC407A','#AB47BC','#26A69A',
-  '#42A5F5','#66BB6A','#FFA726','#EF5350','#7E57C2','#26C6DA','#D4E157','#FF7043','#8D6E63','#78909C'];
-var PANTS=['#2C3E50','#1A237E','#263238','#37474F','#4E342E','#212121','#455A64','#3E2723','#1B5E20','#4A148C'];
-var HSTYLES=['short','long','mohawk','bun','curly','ponytail','buzz','side','afro','bald'];
-var ACCS=['none','glasses','sunglasses','hat','cap','headband','earring','mask','scarf','bowtie'];
 
-/* 상태 목록 */
-var STATES=['☕ 커피 마시는 중','💻 코딩 중','📱 폰 보는 중','🚶 이동 중','💬 대화 중',
+/** 피부색 10가지 */
+var SKINS = ['#FFDBB5','#F5C5A3','#D2956A','#C68642','#8D5524',
+             '#FFCBA4','#E8B88A','#A0724A','#F9E0C0','#D4A97A'];
+
+/** 머리색 10가지 */
+var HAIRS = ['#2C1B0E','#5C3317','#8B4513','#D4A44C','#F5D060',
+             '#C0392B','#E74C3C','#8E44AD','#2980B9','#1ABC9C'];
+
+/** 셔츠색 20가지 */
+var SHIRTS = ['#E74C3C','#3498DB','#2ECC71','#F39C12','#9B59B6',
+  '#1ABC9C','#E67E22','#EC407A','#AB47BC','#26A69A',
+  '#42A5F5','#66BB6A','#FFA726','#EF5350','#7E57C2',
+  '#26C6DA','#D4E157','#FF7043','#8D6E63','#78909C'];
+
+/** 바지색 10가지 */
+var PANTS = ['#2C3E50','#1A237E','#263238','#37474F','#4E342E',
+             '#212121','#455A64','#3E2723','#1B5E20','#4A148C'];
+
+/** 머리스타일 10가지 */
+var HSTYLES = ['short','long','mohawk','bun','curly',
+               'ponytail','buzz','side','afro','bald'];
+
+/** 액세서리 10가지 */
+var ACCS = ['none','glasses','sunglasses','hat','cap',
+            'headband','earring','mask','scarf','bowtie'];
+
+/** 상태 20가지 */
+var STATES = [
+  '☕ 커피 마시는 중','💻 코딩 중','📱 폰 보는 중','🚶 이동 중','💬 대화 중',
   '📋 문서 작업 중','🎧 음악 듣는 중','📞 전화 중','🍕 간식 먹는 중','😴 잠깐 휴식',
   '📊 발표 준비 중','🖊️ 메모 중','📖 읽는 중','🤔 생각 중','🎨 디자인 중',
-  '🔍 검색 중','📧 이메일 확인','🗂️ 정리 중','☕ 카페 주문 중','👋 인사 중'];
+  '🔍 검색 중','📧 이메일 확인','🗂️ 정리 중','☕ 카페 주문 중','👋 인사 중'
+];
 
-var NAMES=['민준','서연','지호','하은','예준','수아','도윤','지우','시우','하린',
+/** 이름 100개 */
+var NAMES = [
+  '민준','서연','지호','하은','예준','수아','도윤','지우','시우','하린',
   '준서','소율','현우','다은','지훈','채원','건우','유진','선우','나윤',
   '민서','지아','우진','시은','재윤','서윤','태윤','윤서','동현','아린',
   'Alex','Emma','Jake','Mia','Leo','Zoe','Kai','Luna','Finn','Aria',
@@ -195,844 +279,766 @@ var NAMES=['민준','서연','지호','하은','예준','수아','도윤','지�
   '유나','하준','소미','준혁','지민','태희','성민','보람','재현','은지',
   '현서','다인','승우','소연','정우','미래','태민','하나','원준','별이',
   '세진','가은','호진','나래','진우','온유','규민','다솔','용준','이슬',
-  '창민','세라','형준','수빈','기현','혜원','대한','미소','한결','고운'];
+  '창민','세라','형준','수빈','기현','혜원','대한','미소','한결','고운'
+];
 
-var NPC_PHRASES=['커피 한잔 할까요?','오늘 미팅 몇 시에요?','점심 뭐 먹을까요?','코드 리뷰 부탁!',
-  '디자인 피드백 좀요~','서버 배포 완료!','좋은 아침!','회의실 예약했어요','런치 같이 가요!',
-  'PR 올렸습니다!','LGTM 👍','화이팅! 💪','잠깐 쉬어요','버그 찾았어요 ㅠ','넵 확인!'];
+/** NPC 대사 */
+var NPC_PHRASES = [
+  '커피 한잔 할까요?','오늘 미팅 몇 시에요?','점심 뭐 먹을까요?','코드 리뷰 부탁!',
+  '디자인 피드백 좀요~','서버 배포 완료!','좋은 아침이에요!','날씨 좋네요~',
+  '회의실 예약했어요','런치 같이 가요!','버그 찾았어요 ㅠ','PR 올렸습니다!',
+  'LGTM 👍','화이팅! 💪','잠깐 쉬어요','넵 확인했습니다!','퇴근하고 치맥?',
+  '이거 어떻게 생각해요?','주말에 뭐 해요?','수고하셨습니다!'
+];
+
+/** NPC 이모지 */
+var NPC_EMOJIS = ['😀','😂','🎉','❤️','👍','🔥','💡','☕','🍕','✨',
+                  '😎','🤔','👋','💪','🎵','🥳','🙌','💯','🌟','😊'];
 
 /* ============================================
-   [SEC-4] 사람 데이터 생성
+   [SEC-4] 사람 데이터 생성 — 100명
    ============================================ */
-var people=[];
+var people = [];
 
+/**
+ * 사람 1명 데이터 생성
+ * @param {number} i — 인덱스 (0~99)
+ * @returns {Object} 사람 데이터
+ */
 function mkPerson(i){
-  var floor=i<34?15:i<67?14:13;
-  /* 층별 바닥 Y 영역 (화면 비율) */
-  var fyMin,fyMax;
-  if(floor===15){fyMin=0.52;fyMax=0.88;}
-  else if(floor===14){fyMin=0.50;fyMax=0.86;}
-  else{fyMin=0.48;fyMax=0.84;}
+  /* 층 배분: 0~33=15F, 34~66=14F, 67~99=13F */
+  var floor = i < 34 ? 15 : i < 67 ? 14 : 13;
 
-  var state=STATES[i%STATES.length];
-  var isSitting=state.indexOf('코딩')>-1||state.indexOf('문서')>-1||state.indexOf('폰')>-1||
-                state.indexOf('디자인')>-1||state.indexOf('검색')>-1||state.indexOf('이메일')>-1||
-                state.indexOf('메모')>-1;
-  var isWalking=state.indexOf('이동')>-1||state.indexOf('인사')>-1||state.indexOf('카페')>-1;
+  /* 층별 Y 범위 (비율좌표) */
+  var fyMin = 0.52, fyMax = 0.88;
 
-  return{
-    id:i,
-    name:NAMES[i%NAMES.length],
-    floor:floor,
-    /* 비율 좌표 (0~1) */
-    rx:0.08+Math.random()*0.84,
-    ry:fyMin+Math.random()*(fyMax-fyMin),
-    vx:0,vy:0,
-    /* 이동 목표 */
-    tx:null,ty:null,
-    /* 스타일 */
-    skin:SKINS[i%10],
-    hair:HAIRS[(i*3+1)%10],
-    shirt:SHIRTS[(i*7+2)%20],
-    pants:PANTS[(i*11+3)%10],
-    hstyle:HSTYLES[(i*13+5)%10],
-    acc:ACCS[(i*17+7)%10],
-    /* 상태 */
-    state:state,
-    sitting:isSitting,
-    walking:isWalking,
-    /* 애니 */
-    dir:0,frame:0,animT:0,
-    bobPhase:Math.random()*6.28,
-    /* 물리 반경 */
-    radius:12,
-    /* 말풍선 */
-    bubble:null,
-    emoji:null,
-    /* AI */
-    aiTimer:Math.random()*200|0,
-    selected:false
+  /* 상태 결정 */
+  var state = STATES[i % STATES.length];
+  var isSitting = /코딩|문서|폰|디자인|검색|이메일|메모|읽는/.test(state);
+  var isWalking = /이동|인사|카페/.test(state);
+
+  return {
+    id: i,
+    name: NAMES[i % NAMES.length],
+    floor: floor,
+
+    /* --- 비율 좌표 (0~1) --- */
+    rx: 0.08 + Math.random() * 0.84,
+    ry: fyMin + Math.random() * (fyMax - fyMin),
+    vx: 0, vy: 0,
+
+    /* --- 이동 목표 --- */
+    tx: null, ty: null,
+
+    /* --- 외형 (인덱스 기반 고유 조합) --- */
+    skin:   SKINS[i % 10],
+    hair:   HAIRS[(i * 3 + 1) % 10],
+    shirt:  SHIRTS[(i * 7 + 2) % 20],
+    pants:  PANTS[(i * 11 + 3) % 10],
+    hstyle: HSTYLES[(i * 13 + 5) % 10],
+    acc:    ACCS[(i * 17 + 7) % 10],
+
+    /* --- 상태 --- */
+    state: state,
+    sitting: isSitting,
+    walking: isWalking,
+    dancing: false,
+
+    /* --- 애니메이션 --- */
+    dir: 0,           /* 0=앞 1=왼 2=뒤 3=오른 */
+    frame: 0,         /* 걷기 프레임 0~3 */
+    animT: 0,         /* 애니메이션 타이머 */
+    bobPhase: Math.random() * 6.28,
+
+    /* --- 물리 --- */
+    radius: 0.012,    /* 충돌 반경 (비율) */
+
+    /* --- 말풍선 / 이모지 --- */
+    bubble: null,     /* {text, timer, type} */
+    emoji: null,      /* {char, timer} */
+
+    /* --- NPC AI --- */
+    aiTimer: (Math.random() * 200) | 0,
+
+    /* --- 선택 --- */
+    selected: false,
+
+    /* --- 히트박스 (렌더링 시 계산) --- */
+    _sx:0, _sy:0, _sw:0, _sh:0
   };
 }
 
+/** 100명 전원 초기화 */
 function initPeople(){
-  people=[];
-  for(var i=0;i<100;i++) people.push(mkPerson(i));
+  people = [];
+  for(var i = 0; i < 100; i++) people.push(mkPerson(i));
 }
 
 /* ============================================
-   [SEC-5] 가구 데이터 (이케아 스타일)
+   [SEC-5] 가구 데이터 — 이케아 스타일 배치
    ============================================ */
-/* 가구: {type, rx, ry, floor, w, h} — 비율 좌표 */
-var furniture=[];
+var furniture = [];
 
+/** 층별 가구 배치 생성 */
 function initFurniture(){
-  furniture=[];
-  var f,r,c;
+  furniture = [];
+  var r, c;
 
-  /* === 15F 라운지 === */
+  /* ═══ 15F 라운지 ═══ */
+
   /* 카페 카운터 (좌측 상단) */
-  furniture.push({type:'counter',rx:0.08,ry:0.55,floor:15,w:120,h:35});
-  furniture.push({type:'coffee',rx:0.14,ry:0.54,floor:15,w:24,h:28});
-  furniture.push({type:'coffee',rx:0.18,ry:0.54,floor:15,w:24,h:28});
+  furniture.push({type:'counter', rx:0.08, ry:0.55, floor:15, w:120, h:35});
+  /* 커피머신 2대 */
+  furniture.push({type:'coffee', rx:0.14, ry:0.54, floor:15, w:24, h:28});
+  furniture.push({type:'coffee', rx:0.18, ry:0.54, floor:15, w:24, h:28});
+  /* 바 스툴 4개 */
+  for(c = 0; c < 4; c++){
+    furniture.push({type:'stool', rx:0.09 + c*0.03, ry:0.58, floor:15, w:16, h:16});
+  }
 
-  /* 라운지 소파 그룹 */
-  for(r=0;r<2;r++){
-    for(c=0;c<3;c++){
-      furniture.push({type:'sofa',rx:0.30+c*0.12,ry:0.58+r*0.14,floor:15,w:50,h:30});
-      furniture.push({type:'ctable',rx:0.32+c*0.12,ry:0.62+r*0.14,floor:15,w:28,h:18});
+  /* 소파 그룹 (2행 3열) */
+  for(r = 0; r < 2; r++){
+    for(c = 0; c < 3; c++){
+      furniture.push({type:'sofa', rx:0.30 + c*0.12, ry:0.58 + r*0.14, floor:15, w:50, h:30});
+      furniture.push({type:'ctable', rx:0.32 + c*0.12, ry:0.62 + r*0.14, floor:15, w:28, h:18});
     }
   }
 
   /* 화분 — 창가 라인 */
-  for(c=0;c<6;c++){
-    furniture.push({type:'plant',rx:0.10+c*0.15,ry:0.50,floor:15,w:20,h:30});
+  for(c = 0; c < 6; c++){
+    furniture.push({type:'plant', rx:0.10 + c*0.15, ry:0.50, floor:15, w:20, h:30});
   }
 
-  /* 바 스툴 */
-  for(c=0;c<4;c++){
-    furniture.push({type:'stool',rx:0.09+c*0.03,ry:0.58,floor:15,w:16,h:16});
-  }
+  /* 책꽂이 (우측) */
+  furniture.push({type:'bookshelf', rx:0.88, ry:0.55, floor:15, w:35, h:50});
+  furniture.push({type:'bookshelf', rx:0.92, ry:0.55, floor:15, w:35, h:50});
 
-  /* 북셸프 */
-  furniture.push({type:'bookshelf',rx:0.88,ry:0.55,floor:15,w:35,h:50});
-  furniture.push({type:'bookshelf',rx:0.92,ry:0.55,floor:15,w:35,h:50});
+  /* 워터쿨러 */
+  furniture.push({type:'water', rx:0.85, ry:0.70, floor:15, w:16, h:24});
 
-  /* === 14F 업무 공간 === */
-  /* 책상 + 모니터 배열 (4행 6열) */
-  for(r=0;r<4;r++){
-    for(c=0;c<6;c++){
-      var dx=0.10+c*0.13;
-      var dy=0.54+r*0.10;
-      furniture.push({type:'desk',rx:dx,ry:dy,floor:14,w:56,h:28});
-      furniture.push({type:'monitor',rx:dx+0.01,ry:dy-0.01,floor:14,w:20,h:16});
-      furniture.push({type:'chair',rx:dx+0.01,ry:dy+0.04,floor:14,w:18,h:18});
+  /* ═══ 14F 업무 공간 ═══ */
+
+  /* 책상+모니터+의자 배열 (4행 6열 = 24세트) */
+  for(r = 0; r < 4; r++){
+    for(c = 0; c < 6; c++){
+      var dx = 0.10 + c * 0.13;
+      var dy = 0.54 + r * 0.10;
+      furniture.push({type:'desk',    rx:dx,       ry:dy,       floor:14, w:56, h:28});
+      furniture.push({type:'monitor', rx:dx+0.01,  ry:dy-0.01,  floor:14, w:20, h:16});
+      furniture.push({type:'chair',   rx:dx+0.01,  ry:dy+0.04,  floor:14, w:18, h:18});
     }
   }
 
-  /* 화이트보드 */
-  furniture.push({type:'whiteboard',rx:0.50,ry:0.50,floor:14,w:60,h:10});
+  /* 화이트보드 2개 */
+  furniture.push({type:'whiteboard', rx:0.50, ry:0.50, floor:14, w:60, h:10});
+  furniture.push({type:'whiteboard', rx:0.80, ry:0.50, floor:14, w:50, h:10});
 
   /* 프린터 */
-  furniture.push({type:'printer',rx:0.90,ry:0.70,floor:14,w:28,h:22});
+  furniture.push({type:'printer', rx:0.90, ry:0.70, floor:14, w:28, h:22});
 
   /* 화분 — 창가 */
-  for(c=0;c<5;c++){
-    furniture.push({type:'plant',rx:0.12+c*0.18,ry:0.50,floor:14,w:20,h:30});
+  for(c = 0; c < 5; c++){
+    furniture.push({type:'plant', rx:0.12 + c*0.18, ry:0.50, floor:14, w:20, h:30});
   }
 
   /* 워터쿨러 */
-  furniture.push({type:'water',rx:0.88,ry:0.56,floor:14,w:16,h:24});
+  furniture.push({type:'water', rx:0.88, ry:0.56, floor:14, w:16, h:24});
 
-  /* === 13F 회의실 === */
+  /* 커피머신 (업무층에도 1대) */
+  furniture.push({type:'coffee', rx:0.06, ry:0.60, floor:14, w:24, h:28});
+
+  /* ═══ 13F 회의실 ═══ */
+
   /* 대형 회의 테이블 */
-  furniture.push({type:'mtable',rx:0.30,ry:0.62,floor:13,w:140,h:50});
-
-  /* 회의 의자 */
-  for(c=0;c<8;c++){
-    furniture.push({type:'mchair',rx:0.22+c*0.04,ry:0.58,floor:13,w:14,h:14});
-    furniture.push({type:'mchair',rx:0.22+c*0.04,ry:0.68,floor:13,w:14,h:14});
+  furniture.push({type:'mtable', rx:0.30, ry:0.62, floor:13, w:140, h:50});
+  /* 회의 의자 (양쪽 8개씩) */
+  for(c = 0; c < 8; c++){
+    furniture.push({type:'mchair', rx:0.22 + c*0.04, ry:0.58, floor:13, w:14, h:14});
+    furniture.push({type:'mchair', rx:0.22 + c*0.04, ry:0.68, floor:13, w:14, h:14});
   }
 
   /* 소회의실 2개 */
-  for(var rm=0;rm<2;rm++){
-    var bx=0.65+rm*0.16;
-    furniture.push({type:'mtable',rx:bx,ry:0.60,floor:13,w:60,h:30});
-    for(c=0;c<3;c++){
-      furniture.push({type:'mchair',rx:bx-0.02+c*0.03,ry:0.56,floor:13,w:14,h:14});
-      furniture.push({type:'mchair',rx:bx-0.02+c*0.03,ry:0.64,floor:13,w:14,h:14});
+  for(var rm = 0; rm < 2; rm++){
+    var bx = 0.65 + rm * 0.16;
+    furniture.push({type:'mtable', rx:bx, ry:0.60, floor:13, w:60, h:30});
+    for(c = 0; c < 3; c++){
+      furniture.push({type:'mchair', rx:bx - 0.02 + c*0.03, ry:0.56, floor:13, w:14, h:14});
+      furniture.push({type:'mchair', rx:bx - 0.02 + c*0.03, ry:0.64, floor:13, w:14, h:14});
     }
   }
 
   /* 프로젝터 스크린 */
-  furniture.push({type:'screen',rx:0.30,ry:0.52,floor:13,w:100,h:8});
+  furniture.push({type:'screen', rx:0.30, ry:0.52, floor:13, w:100, h:8});
 
   /* 화분 */
-  for(c=0;c<4;c++){
-    furniture.push({type:'plant',rx:0.15+c*0.22,ry:0.50,floor:13,w:20,h:30});
+  for(c = 0; c < 4; c++){
+    furniture.push({type:'plant', rx:0.15 + c*0.22, ry:0.50, floor:13, w:20, h:30});
   }
+
+  /* 화이트보드 */
+  furniture.push({type:'whiteboard', rx:0.88, ry:0.54, floor:13, w:45, h:10});
 }
 
 /* ============================================
-   [SEC-6] 배경 그리기 — 창밖 크루즈 항구 뷰
+   [SEC-6] 배경 — 창밖 크루즈 항구 + 언덕 뷰
    ============================================ */
+var bgEls = [];
 
-/* 배경 요소 (구름, 비행기, 배, 패러글라이딩) */
-var bgEls=[];
+/** 배경 움직이는 요소 초기화 */
 function initBg(){
-  bgEls=[];
+  bgEls = [];
   var i;
+  /* 구름 12개 */
   for(i=0;i<12;i++) bgEls.push({t:'cloud',x:Math.random()*2,y:0.05+Math.random()*0.18,sp:0.00008+Math.random()*0.00015,sz:0.04+Math.random()*0.05,op:0.5+Math.random()*0.4});
+  /* 비행기 2대 */
   for(i=0;i<2;i++) bgEls.push({t:'plane',x:Math.random()*1.5,y:0.06+Math.random()*0.1,sp:0.0003+Math.random()*0.0002,sz:0.02+Math.random()*0.01});
+  /* 크루즈 2척 */
   bgEls.push({t:'cruise',x:0.3,y:0.34,sp:0.00003,sz:0.06});
   bgEls.push({t:'cruise',x:0.65,y:0.36,sp:0.00002,sz:0.04});
+  /* 소형 선박 3척 */
   for(i=0;i<3;i++) bgEls.push({t:'ship',x:0.1+Math.random()*0.8,y:0.33+Math.random()*0.06,sp:0.00005+Math.random()*0.00005,sz:0.015+Math.random()*0.01});
+  /* 패러글라이딩 2대 */
   for(i=0;i<2;i++) bgEls.push({t:'para',x:0.2+Math.random()*0.6,y:0.12+Math.random()*0.08,sp:0.0001+Math.random()*0.0001,sz:0.012,ph:Math.random()*6.28});
+  /* 새 떼 6마리 */
   for(i=0;i<6;i++) bgEls.push({t:'bird',x:Math.random()*1.5,y:0.08+Math.random()*0.15,sp:0.0002+Math.random()*0.0002,sz:3+Math.random()*3,ph:Math.random()*6.28});
 }
 
-function drawBg(){
-  /* 창 영역 (상단 ~48%) */
-  var winTop=34; /* HUD 아래 */
-  var winH=H*0.48-viewY*H*0.15;
-  var winBot=winTop+winH;
-  var vOff=viewY*60; /* 뷰 Y에 따른 오프셋 */
-  var hOff=(viewX-0.5)*120;
+/** 헬퍼: 픽셀 사각형 (소수점 제거) */
+function rr(x,y,w,h){ cx.fillRect(x|0,y|0,Math.max(1,w|0),Math.max(1,h|0)); }
 
-  /* --- 하늘 --- */
-  var sky=cx.createLinearGradient(0,winTop,0,winBot);
-  sky.addColorStop(0,'#5BAADB');
-  sky.addColorStop(0.3,'#87CEEB');
-  sky.addColorStop(0.55,'#B0E2FF');
-  sky.addColorStop(0.7,'#E0F0FF');
-  sky.addColorStop(0.82,'#6BC5E8');
-  sky.addColorStop(1,'#1976D2');
-  cx.fillStyle=sky;
-  cx.fillRect(0,winTop,W,winH);
+/** 배경 전체 그리기 */
+function drawBg(){
+  var winTop = 34;
+  var winH = H * 0.48 - viewY * H * 0.15;
+  var winBot = winTop + winH;
+  var vOff = viewY * 60;
+  var hOff = (viewX - 0.5) * 120;
+
+  /* --- 하늘 그라디언트 --- */
+  var sky = cx.createLinearGradient(0, winTop, 0, winBot);
+  sky.addColorStop(0,'#5BAADB'); sky.addColorStop(0.3,'#87CEEB');
+  sky.addColorStop(0.55,'#B0E2FF'); sky.addColorStop(0.7,'#E0F0FF');
+  sky.addColorStop(0.82,'#6BC5E8'); sky.addColorStop(1,'#1976D2');
+  cx.fillStyle = sky;
+  cx.fillRect(0, winTop, W, winH);
 
   /* --- 태양 --- */
-  var sunX=W*0.8+hOff*0.3;
-  var sunY=winTop+winH*0.12-vOff*0.5;
-  var sg=cx.createRadialGradient(sunX,sunY,5,sunX,sunY,60);
+  var sunX = W * 0.8 + hOff * 0.3;
+  var sunY = winTop + winH * 0.12 - vOff * 0.5;
+  var sg = cx.createRadialGradient(sunX,sunY,5,sunX,sunY,60);
   sg.addColorStop(0,'rgba(255,255,220,1)');
   sg.addColorStop(0.4,'rgba(255,240,180,0.5)');
   sg.addColorStop(1,'rgba(255,200,100,0)');
-  cx.fillStyle=sg;cx.beginPath();cx.arc(sunX,sunY,60,0,Math.PI*2);cx.fill();
+  cx.fillStyle = sg; cx.beginPath(); cx.arc(sunX,sunY,60,0,Math.PI*2); cx.fill();
 
-  /* --- 산 (좌측 먼 산) --- */
-  var mBase=winBot-winH*0.18+vOff*0.4;
-  cx.fillStyle='#7986CB';
+  /* --- 먼 산 (좌측) --- */
+  var mBase = winBot - winH * 0.18 + vOff * 0.4;
+  cx.fillStyle = '#7986CB';
   cx.beginPath();
-  cx.moveTo(-50+hOff*0.2,mBase);
-  cx.lineTo(W*0.05+hOff*0.2,mBase-winH*0.22);
-  cx.lineTo(W*0.12+hOff*0.2,mBase-winH*0.15);
-  cx.lineTo(W*0.18+hOff*0.2,mBase-winH*0.28);
-  cx.lineTo(W*0.28+hOff*0.2,mBase-winH*0.12);
-  cx.lineTo(W*0.35+hOff*0.2,mBase-winH*0.20);
-  cx.lineTo(W*0.42+hOff*0.2,mBase);
-  cx.closePath();cx.fill();
+  cx.moveTo(-50 + hOff*0.2, mBase);
+  var mPts = [[0.05,-0.22],[0.12,-0.15],[0.18,-0.28],[0.28,-0.12],[0.35,-0.20],[0.42,0]];
+  for(var mi=0;mi<mPts.length;mi++) cx.lineTo(W*mPts[mi][0]+hOff*0.2, mBase+winH*mPts[mi][1]);
+  cx.closePath(); cx.fill();
 
-  /* 눈 */
-  cx.fillStyle='rgba(255,255,255,0.5)';
+  /* 눈 덮인 봉우리 */
+  cx.fillStyle = 'rgba(255,255,255,0.5)';
   cx.beginPath();
-  cx.moveTo(W*0.18+hOff*0.2,mBase-winH*0.28);
-  cx.lineTo(W*0.15+hOff*0.2,mBase-winH*0.22);
-  cx.lineTo(W*0.21+hOff*0.2,mBase-winH*0.22);
-  cx.closePath();cx.fill();
+  cx.moveTo(W*0.18+hOff*0.2, mBase-winH*0.28);
+  cx.lineTo(W*0.15+hOff*0.2, mBase-winH*0.22);
+  cx.lineTo(W*0.21+hOff*0.2, mBase-winH*0.22);
+  cx.closePath(); cx.fill();
 
-  /* --- 우측 낮은 언덕 --- */
-  cx.fillStyle='#66BB6A';
+  /* --- 우측 낮은 언덕 (초록) --- */
+  cx.fillStyle = '#66BB6A';
   cx.beginPath();
-  cx.moveTo(W*0.55+hOff*0.3,mBase+winH*0.05);
-  cx.quadraticCurveTo(W*0.7+hOff*0.3,mBase-winH*0.12,W*0.85+hOff*0.3,mBase+winH*0.02);
-  cx.quadraticCurveTo(W*0.95+hOff*0.3,mBase-winH*0.06,W+50+hOff*0.3,mBase+winH*0.05);
-  cx.lineTo(W+50,mBase+winH*0.1);
-  cx.lineTo(W*0.55+hOff*0.3,mBase+winH*0.1);
-  cx.closePath();cx.fill();
+  cx.moveTo(W*0.55+hOff*0.3, mBase+winH*0.05);
+  cx.quadraticCurveTo(W*0.7+hOff*0.3, mBase-winH*0.12, W*0.85+hOff*0.3, mBase+winH*0.02);
+  cx.quadraticCurveTo(W*0.95+hOff*0.3, mBase-winH*0.06, W+50+hOff*0.3, mBase+winH*0.05);
+  cx.lineTo(W+50, mBase+winH*0.1);
+  cx.lineTo(W*0.55+hOff*0.3, mBase+winH*0.1);
+  cx.closePath(); cx.fill();
 
-  /* 언덕 위 나무들 */
-  cx.fillStyle='#43A047';
-  var treeXs=[0.62,0.68,0.74,0.78,0.82,0.88];
-  for(var ti=0;ti<treeXs.length;ti++){
-    var ttx=W*treeXs[ti]+hOff*0.3;
-    var tty=mBase-winH*0.02-Math.sin(treeXs[ti]*8)*winH*0.04;
-    cx.beginPath();cx.moveTo(ttx,tty);
-    cx.lineTo(ttx-6,tty+12);cx.lineTo(ttx+6,tty+12);cx.closePath();cx.fill();
+  /* 언덕 위 나무 */
+  cx.fillStyle = '#43A047';
+  var trees = [0.62,0.68,0.74,0.78,0.82,0.88];
+  for(var ti=0;ti<trees.length;ti++){
+    var ttx = W*trees[ti]+hOff*0.3;
+    var tty = mBase-winH*0.02-Math.sin(trees[ti]*8)*winH*0.04;
+    cx.beginPath();cx.moveTo(ttx,tty);cx.lineTo(ttx-6,tty+12);cx.lineTo(ttx+6,tty+12);cx.closePath();cx.fill();
     cx.fillStyle='#2E7D32';
-    cx.beginPath();cx.moveTo(ttx,tty-5);
-    cx.lineTo(ttx-5,tty+5);cx.lineTo(ttx+5,tty+5);cx.closePath();cx.fill();
+    cx.beginPath();cx.moveTo(ttx,tty-5);cx.lineTo(ttx-5,tty+5);cx.lineTo(ttx+5,tty+5);cx.closePath();cx.fill();
     cx.fillStyle='#43A047';
   }
 
   /* --- 바다 --- */
-  var seaY=mBase+winH*0.02;
-  var seaGrd=cx.createLinearGradient(0,seaY,0,winBot);
-  seaGrd.addColorStop(0,'#4FC3F7');seaGrd.addColorStop(0.4,'#039BE5');seaGrd.addColorStop(1,'#01579B');
-  cx.fillStyle=seaGrd;cx.fillRect(0,seaY,W,winBot-seaY);
+  var seaY = mBase + winH * 0.02;
+  var seaGrd = cx.createLinearGradient(0,seaY,0,winBot);
+  seaGrd.addColorStop(0,'#4FC3F7'); seaGrd.addColorStop(0.4,'#039BE5'); seaGrd.addColorStop(1,'#01579B');
+  cx.fillStyle = seaGrd; cx.fillRect(0, seaY, W, winBot - seaY);
 
   /* 바다 반짝임 */
-  cx.fillStyle='rgba(255,255,255,0.12)';
+  cx.fillStyle = 'rgba(255,255,255,0.12)';
   for(var wi=0;wi<25;wi++){
-    var wxx=((wi*127+TICK*0.4)%(W+100))-30+hOff*0.2;
-    var wyy=seaY+5+(wi*43%(winBot-seaY-10));
+    var wxx = ((wi*127+TICK*0.4)%(W+100))-30+hOff*0.2;
+    var wyy = seaY+5+(wi*43%Math.max(1,winBot-seaY-10));
     cx.fillRect(wxx|0,wyy|0,12+wi%15,1);
   }
 
   /* --- 크루즈 항구 부두 --- */
-  var dockY=seaY+winH*0.01;
-  cx.fillStyle='#795548';
-  cx.fillRect(W*0.25+hOff*0.25,dockY|0,W*0.2,4);
-  /* 부두 기둥 */
-  cx.fillStyle='#5D4037';
-  for(var di=0;di<6;di++){
-    cx.fillRect((W*0.26+di*W*0.033+hOff*0.25)|0,(dockY)|0,3,8);
-  }
+  var dockY = seaY + winH * 0.01;
+  cx.fillStyle = '#795548'; rr(W*0.25+hOff*0.25, dockY, W*0.2, 4);
+  cx.fillStyle = '#5D4037';
+  for(var di=0;di<6;di++) rr(W*0.26+di*W*0.033+hOff*0.25, dockY, 3, 8);
 
-  /* --- 배경 요소 업데이트 --- */
+  /* --- 배경 요소 렌더 --- */
   for(var bi=0;bi<bgEls.length;bi++){
-    var b=bgEls[bi];
-    b.x+=b.sp;
-    if(b.x>1.5)b.x=-0.3;
-    if(b.x<-0.4)b.x=1.4;
+    var b = bgEls[bi];
+    b.x += b.sp;
+    if(b.x > 1.5) b.x = -0.3;
+    if(b.x < -0.4) b.x = 1.4;
 
-    var bx=b.x*W+hOff*(b.t==='cloud'?0.15:b.t==='ship'||b.t==='cruise'?0.25:0.1);
-    var by=winTop+b.y*winH-vOff*(b.t==='cloud'?0.4:0.2);
+    var bx = b.x*W + hOff*(b.t==='cloud'?0.15:b.t==='ship'||b.t==='cruise'?0.25:0.1);
+    var by = winTop + b.y*winH - vOff*(b.t==='cloud'?0.4:0.2);
 
     switch(b.t){
-      case'cloud':drawCloud(bx,by,b.sz*W,b.op);break;
-      case'plane':drawPlane(bx,by,b.sz*W);break;
-      case'cruise':drawCruise(bx,by+vOff*0.2,b.sz*W);break;
-      case'ship':drawShip(bx,by+vOff*0.2,b.sz*W);break;
-      case'para':drawPara(bx,by+Math.sin(TICK*0.04+b.ph)*8,b.sz*W);break;
-      case'bird':drawBird(bx,by,b.sz,b.ph);break;
+      case 'cloud': drawCloud(bx,by,b.sz*W,b.op); break;
+      case 'plane': drawPlane(bx,by,b.sz*W); break;
+      case 'cruise': drawCruise(bx,by+vOff*0.2,b.sz*W); break;
+      case 'ship': drawShip(bx,by+vOff*0.2,b.sz*W); break;
+      case 'para': drawPara(bx,by+Math.sin(TICK*0.04+(b.ph||0))*8,b.sz*W); break;
+      case 'bird': drawBird(bx,by,b.sz,b.ph||0); break;
     }
   }
 }
 
-function drawCloud(x,y,s,op){cx.globalAlpha=op;cx.fillStyle='#fff';
-  rr(x,y,s,s*0.35);rr(x+s*0.15,y-s*0.2,s*0.7,s*0.25);rr(x+s*0.3,y-s*0.32,s*0.4,s*0.18);
-  cx.globalAlpha=1;}
+/* --- 배경 요소 개별 그리기 --- */
 
+function drawCloud(x,y,s,op){
+  cx.globalAlpha=op;cx.fillStyle='#fff';
+  rr(x,y,s,s*0.35);rr(x+s*0.15,y-s*0.2,s*0.7,s*0.25);rr(x+s*0.3,y-s*0.32,s*0.4,s*0.18);
+  cx.globalAlpha=1;
+}
 function drawPlane(x,y,s){
   cx.fillStyle='#ECEFF1';rr(x,y,s*2,s*0.3);
   cx.fillStyle='#E74C3C';rr(x-s*0.2,y-s*0.15,s*0.35,s*0.5);
-  cx.fillStyle='#90A4AE';rr(x+s*0.3,y-s*0.08,s*1,s*0.08);rr(x+s*0.3,y+s*0.25,s*1,s*0.08);
+  cx.fillStyle='#90A4AE';rr(x+s*0.3,y-s*0.08,s,s*0.08);rr(x+s*0.3,y+s*0.25,s,s*0.08);
+  cx.fillStyle='#4FC3F7';for(var w=0;w<4;w++)rr(x+s*0.4+w*s*0.2,y+s*0.05,s*0.08,s*0.08);
   cx.fillStyle='rgba(255,255,255,0.3)';rr(x-s*0.6,y+s*0.08,s*0.5,s*0.04);
 }
-
 function drawCruise(x,y,s){
-  /* 크루즈 선체 */
-  cx.fillStyle='#263238';
-  cx.beginPath();cx.moveTo(x,y);cx.lineTo(x+s*2.5,y);cx.lineTo(x+s*2.2,y+s*0.5);
-  cx.lineTo(x+s*0.3,y+s*0.5);cx.closePath();cx.fill();
-  /* 상부 구조 */
+  cx.fillStyle='#263238';cx.beginPath();cx.moveTo(x,y);cx.lineTo(x+s*2.5,y);cx.lineTo(x+s*2.2,y+s*0.5);cx.lineTo(x+s*0.3,y+s*0.5);cx.closePath();cx.fill();
   cx.fillStyle='#ECEFF1';rr(x+s*0.4,y-s*0.5,s*1.6,s*0.5);
-  cx.fillStyle='#B0BEC5';rr(x+s*0.6,y-s*0.8,s*1,s*0.3);
-  cx.fillStyle='#78909C';rr(x+s*0.9,y-s*1,s*0.4,s*0.2);
-  /* 창문 */
-  cx.fillStyle='#4FC3F7';
-  for(var i=0;i<8;i++) rr(x+s*0.5+i*s*0.18,y-s*0.4,s*0.1,s*0.08);
-  /* 연기 */
-  cx.fillStyle='rgba(200,200,200,0.3)';
-  rr(x+s*1+Math.sin(TICK*0.02)*3,y-s*1.2,s*0.2,s*0.15);
-  rr(x+s*0.9+Math.sin(TICK*0.025)*4,y-s*1.35,s*0.15,s*0.12);
-  /* 물결 */
+  cx.fillStyle='#B0BEC5';rr(x+s*0.6,y-s*0.8,s,s*0.3);
+  cx.fillStyle='#78909C';rr(x+s*0.9,y-s,s*0.4,s*0.2);
+  cx.fillStyle='#4FC3F7';for(var i=0;i<8;i++)rr(x+s*0.5+i*s*0.18,y-s*0.4,s*0.1,s*0.08);
+  cx.fillStyle='rgba(200,200,200,0.3)';rr(x+s+Math.sin(TICK*0.02)*3,y-s*1.2,s*0.2,s*0.15);
   cx.fillStyle='rgba(255,255,255,0.2)';rr(x-s*0.1,y+s*0.5,s*2.7,s*0.06);
 }
-
 function drawShip(x,y,s){
-  cx.fillStyle='#5D4037';
-  cx.beginPath();cx.moveTo(x,y);cx.lineTo(x+s*1.5,y);cx.lineTo(x+s*1.2,y+s*0.4);
-  cx.lineTo(x+s*0.2,y+s*0.4);cx.closePath();cx.fill();
+  cx.fillStyle='#5D4037';cx.beginPath();cx.moveTo(x,y);cx.lineTo(x+s*1.5,y);cx.lineTo(x+s*1.2,y+s*0.4);cx.lineTo(x+s*0.2,y+s*0.4);cx.closePath();cx.fill();
   cx.fillStyle='#F5F5F5';rr(x+s*0.4,y-s*0.6,s*0.08,s*0.6);
-  cx.fillStyle='#fff';cx.beginPath();cx.moveTo(x+s*0.48,y-s*0.5);
-  cx.lineTo(x+s*0.9,y-s*0.15);cx.lineTo(x+s*0.48,y-s*0.15);cx.closePath();cx.fill();
+  cx.fillStyle='#fff';cx.beginPath();cx.moveTo(x+s*0.48,y-s*0.5);cx.lineTo(x+s*0.9,y-s*0.15);cx.lineTo(x+s*0.48,y-s*0.15);cx.closePath();cx.fill();
 }
-
 function drawPara(x,y,s){
   cx.fillStyle='#FF7043';cx.beginPath();cx.ellipse(x,y,s*5,s*2,0,Math.PI,0);cx.fill();
   cx.fillStyle='#FFAB91';cx.beginPath();cx.ellipse(x,y,s*3.5,s*1.2,0,Math.PI,0);cx.fill();
-  cx.strokeStyle='#795548';cx.lineWidth=1;cx.beginPath();
-  cx.moveTo(x-s*2.5,y);cx.lineTo(x,y+s*6);cx.moveTo(x+s*2.5,y);cx.lineTo(x,y+s*6);cx.stroke();
-  cx.fillStyle='#FFB74D';rr(x-2,y+s*6,4,5);
-  cx.fillStyle='#42A5F5';rr(x-2,y+s*6+5,5,4);
+  cx.strokeStyle='#795548';cx.lineWidth=1;cx.beginPath();cx.moveTo(x-s*2.5,y);cx.lineTo(x,y+s*6);cx.moveTo(x+s*2.5,y);cx.lineTo(x,y+s*6);cx.stroke();
+  cx.fillStyle='#FFB74D';rr(x-2,y+s*6,4,5);cx.fillStyle='#42A5F5';rr(x-2,y+s*6+5,5,4);
 }
-
 function drawBird(x,y,s,ph){
   var wy=Math.sin(TICK*0.15+ph)*s;
-  cx.fillStyle='#37474F';cx.beginPath();
-  cx.moveTo(x,y);cx.lineTo(x-s*2,y+wy);cx.lineTo(x-s*0.5,y);
-  cx.lineTo(x+s*0.5,y);cx.lineTo(x+s*2,y+wy);cx.closePath();cx.fill();
+  cx.fillStyle='#37474F';cx.beginPath();cx.moveTo(x,y);cx.lineTo(x-s*2,y+wy);cx.lineTo(x-s*0.5,y);cx.lineTo(x+s*0.5,y);cx.lineTo(x+s*2,y+wy);cx.closePath();cx.fill();
 }
 
-function rr(x,y,w,h){cx.fillRect(x|0,y|0,w|0,h|0);}
-
 /* ============================================
-   [SEC-7] 창틀 프레임 그리기
+   [SEC-7] 창틀 프레임 — 통유리 알루미늄 프레임
    ============================================ */
 function drawWindowFrame(){
-  var winTop=34;
-  var winH=H*0.48-viewY*H*0.15;
-  var winBot=winTop+winH;
-  var frameW=6;
+  var winTop=34, winH=H*0.48-viewY*H*0.15, winBot=winTop+winH, fw=6;
 
-  /* 창틀 외곽 프레임 — 다크그레이 알루미늄 */
+  /* 외곽 프레임 — 다크 알루미늄 */
   cx.fillStyle='#37474F';
-  /* 상단 */
-  rr(0,winTop,W,frameW);
-  /* 하단 (창턱) */
-  rr(0,winBot-frameW,W,frameW+4);
-  /* 좌 */
-  rr(0,winTop,frameW,winH);
-  /* 우 */
-  rr(W-frameW,winTop,frameW,winH);
+  rr(0,winTop,W,fw); rr(0,winBot-fw,W,fw+4);
+  rr(0,winTop,fw,winH); rr(W-fw,winTop,fw,winH);
 
-  /* 세로 프레임 (통유리 분할) */
+  /* 세로 분할 (6등분) */
   var cols=6;
   for(var i=1;i<cols;i++){
-    var fx=W*i/cols;
-    cx.fillStyle='#455A64';
-    rr(fx-2,winTop,4,winH);
+    cx.fillStyle='#455A64'; rr(W*i/cols-2,winTop,4,winH);
   }
 
-  /* 가로 중간 프레임 */
-  var midY=winTop+winH*0.5;
-  cx.fillStyle='#455A64';
-  rr(0,midY-1.5,W,3);
+  /* 가로 중간 분할 */
+  cx.fillStyle='#455A64'; rr(0,winTop+winH*0.5-1.5,W,3);
 
-  /* 창턱 디테일 — 밝은 면 */
-  cx.fillStyle='#546E7A';
-  rr(0,winBot-2,W,2);
-  cx.fillStyle='#607D8B';
-  rr(0,winBot+2,W,6);
+  /* 창턱 디테일 */
+  cx.fillStyle='#546E7A'; rr(0,winBot-2,W,2);
+  cx.fillStyle='#607D8B'; rr(0,winBot+2,W,6);
 
-  /* 유리 반사 효과 */
-  cx.globalAlpha=0.04;
-  cx.fillStyle='#fff';
-  for(var gi=0;gi<cols;gi++){
-    var gx=W*gi/cols+10;
-    rr(gx,winTop+10,30,winH-20);
-  }
+  /* 유리 반사선 */
+  cx.globalAlpha=0.04; cx.fillStyle='#fff';
+  for(var gi=0;gi<cols;gi++) rr(W*gi/cols+10,winTop+10,30,winH-20);
   cx.globalAlpha=1;
 
-  /* 대각선 빛 줄기 */
-  cx.save();
-  cx.globalAlpha=0.02+Math.sin(TICK*0.008)*0.01;
-  cx.fillStyle='#fff';
-  cx.beginPath();
-  cx.moveTo(W*0.3,winTop);cx.lineTo(W*0.5,winTop);
-  cx.lineTo(W*0.1,winBot);cx.lineTo(-20,winBot);cx.closePath();cx.fill();
+  /* 대각선 빛줄기 */
+  cx.save(); cx.globalAlpha=0.02+Math.sin(TICK*0.008)*0.01; cx.fillStyle='#fff';
+  cx.beginPath();cx.moveTo(W*0.3,winTop);cx.lineTo(W*0.5,winTop);cx.lineTo(W*0.1,winBot);cx.lineTo(-20,winBot);cx.closePath();cx.fill();
   cx.restore();
 }
 
 /* ============================================
-   [SEC-8] 바닥 & 천장 그리기
+   [SEC-8] 바닥 & 천장 & 벽 & 조명
    ============================================ */
-function drawFloor(){
-  var winBot=34+H*0.48-viewY*H*0.15;
-  var floorH=H-winBot;
+function drawInterior(){
+  var winBot = 34 + H*0.48 - viewY*H*0.15;
+  var floorH = H - winBot;
 
-  /* 바닥 — 밝은 오크 나무 */
-  var floorGrd=cx.createLinearGradient(0,winBot,0,H);
-  floorGrd.addColorStop(0,'#F5E6CA');
-  floorGrd.addColorStop(0.3,'#EFD9B4');
-  floorGrd.addColorStop(1,'#E8CDA0');
-  cx.fillStyle=floorGrd;
-  cx.fillRect(0,winBot|0,W,floorH);
+  /* --- 바닥 (밝은 오크) --- */
+  var fg = cx.createLinearGradient(0,winBot,0,H);
+  fg.addColorStop(0,'#F5E6CA'); fg.addColorStop(0.3,'#EFD9B4'); fg.addColorStop(1,'#E8CDA0');
+  cx.fillStyle = fg; cx.fillRect(0,winBot|0,W,floorH);
 
-  /* 나무결 패턴 */
+  /* 나무결 세로선 */
   cx.fillStyle='rgba(0,0,0,0.015)';
-  var plankW=80;
-  for(var px=0;px<W;px+=plankW){
-    cx.fillRect(px|0,winBot|0,1,floorH);
-  }
-  /* 가로줄 */
+  for(var px2=0;px2<W;px2+=80) cx.fillRect(px2|0,winBot|0,1,floorH);
+  /* 나무결 가로선 */
   cx.fillStyle='rgba(0,0,0,0.01)';
-  for(var py=winBot;py<H;py+=plankW*0.6){
-    cx.fillRect(0,py|0,W,1);
-  }
+  for(var py2=winBot;py2<H;py2+=48) cx.fillRect(0,py2|0,W,1);
 
-  /* 천장 (창 위 약간) — 화이트 */
-  cx.fillStyle='#F5F5F5';
-  cx.fillRect(0,0,W,34);
+  /* --- 천장 --- */
+  cx.fillStyle='#F5F5F5'; cx.fillRect(0,0,W,34);
 
-  /* 천장 조명 */
+  /* --- 천장 조명 5개 --- */
   for(var li=0;li<5;li++){
     var lx=W*0.12+li*W*0.19;
-    /* 조명 기구 */
-    cx.fillStyle='#E0E0E0';
-    rr(lx-20,34,40,4);
-    cx.fillStyle='#FAFAFA';
-    rr(lx-15,38,30,3);
+    cx.fillStyle='#E0E0E0'; rr(lx-20,34,40,4);
+    cx.fillStyle='#FAFAFA'; rr(lx-15,38,30,3);
     /* 빛 원뿔 */
-    cx.save();
-    cx.globalAlpha=0.03;
-    cx.fillStyle='#FFFDE7';
-    cx.beginPath();
-    cx.moveTo(lx-15,41);cx.lineTo(lx+15,41);
-    cx.lineTo(lx+50,H*0.6);cx.lineTo(lx-50,H*0.6);
-    cx.closePath();cx.fill();
+    cx.save(); cx.globalAlpha=0.03; cx.fillStyle='#FFFDE7';
+    cx.beginPath();cx.moveTo(lx-15,41);cx.lineTo(lx+15,41);cx.lineTo(lx+50,H*0.6);cx.lineTo(lx-50,H*0.6);cx.closePath();cx.fill();
     cx.restore();
   }
 
-  /* 벽면 (좌우) */
-  cx.fillStyle='#FAFAFA';
-  rr(0,34,8,H-34);
-  rr(W-8,34,8,H-34);
-  cx.fillStyle='#E0E0E0';
-  rr(0,34,3,H-34);
-  rr(W-3,34,3,H-34);
+  /* --- 좌우 벽면 --- */
+  cx.fillStyle='#FAFAFA'; rr(0,34,8,H-34); rr(W-8,34,8,H-34);
+  cx.fillStyle='#E0E0E0'; rr(0,34,3,H-34); rr(W-3,34,3,H-34);
 }
 
 /* ============================================
    [SEC-9] 가구 렌더링 — 이케아 스타일 픽셀아트
    ============================================ */
-function drawFurniture(){
-  var winBot=34+H*0.48-viewY*H*0.15;
+function drawAllFurniture(){
+  var winBot = 34 + H*0.48 - viewY*H*0.15;
 
-  for(var i=0;i<furniture.length;i++){
-    var f=furniture[i];
-    if(f.floor!==curFloor) continue;
+  for(var i=0; i<furniture.length; i++){
+    var f = furniture[i];
+    if(f.floor !== curFloor) continue;
 
-    var fx=f.rx*W+(viewX-0.5)*-80;
-    var fy=winBot+(f.ry-0.48)*H*1.1+viewY*30;
-    var fw=f.w*viewZoom;
-    var fh=f.h*viewZoom;
+    var fx = f.rx * W + (viewX-0.5)*-80;
+    var fy = winBot + (f.ry-0.48)*H*1.1 + viewY*30;
+    var fw = f.w * viewZoom;
+    var fh = f.h * viewZoom;
 
     switch(f.type){
-      case'desk': drawDesk(fx,fy,fw,fh); break;
-      case'monitor': drawMonitor(fx,fy,fw,fh); break;
-      case'chair': drawChair(fx,fy,fw,fh); break;
-      case'sofa': drawSofa(fx,fy,fw,fh); break;
-      case'ctable': drawCoffeeTable(fx,fy,fw,fh); break;
-      case'plant': drawPlant(fx,fy,fw,fh); break;
-      case'counter': drawCounter(fx,fy,fw,fh); break;
-      case'coffee': drawCoffeeMachine(fx,fy,fw,fh); break;
-      case'stool': drawStool(fx,fy,fw,fh); break;
-      case'bookshelf': drawBookshelf(fx,fy,fw,fh); break;
-      case'whiteboard': drawWhiteboard(fx,fy,fw,fh); break;
-      case'printer': drawPrinter(fx,fy,fw,fh); break;
-      case'water': drawWaterCooler(fx,fy,fw,fh); break;
-      case'mtable': drawMeetingTable(fx,fy,fw,fh); break;
-      case'mchair': drawMeetingChair(fx,fy,fw,fh); break;
-      case'screen': drawScreen(fx,fy,fw,fh); break;
+      case 'desk': fDesk(fx,fy,fw,fh); break;
+      case 'monitor': fMonitor(fx,fy,fw,fh); break;
+      case 'chair': fChair(fx,fy,fw,fh); break;
+      case 'sofa': fSofa(fx,fy,fw,fh); break;
+      case 'ctable': fCTable(fx,fy,fw,fh); break;
+      case 'plant': fPlant(fx,fy,fw,fh); break;
+      case 'counter': fCounter(fx,fy,fw,fh); break;
+      case 'coffee': fCoffee(fx,fy,fw,fh); break;
+      case 'stool': fStool(fx,fy,fw,fh); break;
+      case 'bookshelf': fBookshelf(fx,fy,fw,fh); break;
+      case 'whiteboard': fWB(fx,fy,fw,fh); break;
+      case 'printer': fPrinter(fx,fy,fw,fh); break;
+      case 'water': fWater(fx,fy,fw,fh); break;
+      case 'mtable': fMTable(fx,fy,fw,fh); break;
+      case 'mchair': fMChair(fx,fy,fw,fh); break;
+      case 'screen': fScreen(fx,fy,fw,fh); break;
     }
   }
 }
 
-/* --- 개별 가구 픽셀 아트 함수들 --- */
+/* --- [FURN] 개별 가구 함수들 --- */
 
-/** [FURN] 책상 — 이케아 BEKANT 스타일 */
-function drawDesk(x,y,w,h){
-  /* 다리 */
-  cx.fillStyle='#BDBDBD';
-  rr(x+2,y+h-4,3,6);rr(x+w-5,y+h-4,3,6);
-  /* 상판 */
-  cx.fillStyle='#D7CCC8';rr(x,y,w,h*0.35);
-  cx.fillStyle='#EFEBE9';rr(x+1,y+1,w-2,h*0.35-2);
-  /* 키보드 */
-  cx.fillStyle='#424242';rr(x+w*0.3,y+h*0.05,w*0.35,h*0.15);
-  cx.fillStyle='#616161';rr(x+w*0.31,y+h*0.06,w*0.33,h*0.13);
-  /* 마우스 */
+/** 책상 — IKEA BEKANT */
+function fDesk(x,y,w,h){
+  cx.fillStyle='#BDBDBD';rr(x+2,y+h-4,3,6);rr(x+w-5,y+h-4,3,6);
+  cx.fillStyle='#D7CCC8';rr(x,y,w,h*0.35);cx.fillStyle='#EFEBE9';rr(x+1,y+1,w-2,h*0.35-2);
+  cx.fillStyle='#424242';rr(x+w*0.3,y+h*0.05,w*0.35,h*0.15);cx.fillStyle='#616161';rr(x+w*0.31,y+h*0.06,w*0.33,h*0.13);
   cx.fillStyle='#333';rr(x+w*0.7,y+h*0.1,w*0.08,h*0.12);
-  /* 머그컵 */
-  cx.fillStyle='#FFFFFF';rr(x+w*0.85,y+h*0.02,w*0.08,h*0.15);
-  cx.fillStyle='#795548';rr(x+w*0.86,y+h*0.04,w*0.06,h*0.08);
+  cx.fillStyle='#fff';rr(x+w*0.85,y+h*0.02,w*0.08,h*0.15);cx.fillStyle='#795548';rr(x+w*0.86,y+h*0.04,w*0.06,h*0.08);
 }
 
-/** [FURN] 모니터 */
-function drawMonitor(x,y,w,h){
-  /* 스탠드 */
-  cx.fillStyle='#757575';rr(x+w*0.4,y+h*0.7,w*0.2,h*0.3);
-  cx.fillStyle='#9E9E9E';rr(x+w*0.25,y+h*0.9,w*0.5,h*0.1);
-  /* 프레임 */
+/** 모니터 */
+function fMonitor(x,y,w,h){
+  cx.fillStyle='#757575';rr(x+w*0.4,y+h*0.7,w*0.2,h*0.3);cx.fillStyle='#9E9E9E';rr(x+w*0.25,y+h*0.9,w*0.5,h*0.1);
   cx.fillStyle='#212121';rr(x,y,w,h*0.75);
-  /* 화면 */
-  var scr=['#1565C0','#0D47A1','#1976D2','#42A5F5'];
-  cx.fillStyle=scr[((x*7|0)+TICK*0.01|0)%4];
-  rr(x+2,y+2,w-4,h*0.75-4);
-  /* 화면 내용 — 코드 라인 */
-  cx.fillStyle='rgba(255,255,255,0.3)';
-  for(var ln=0;ln<3;ln++){
-    rr(x+4,y+5+ln*4,w*0.3+ln*w*0.15,1);
-  }
+  var sc=['#1565C0','#0D47A1','#1976D2','#42A5F5'];
+  cx.fillStyle=sc[((x*7|0)+TICK*0.01|0)%4];rr(x+2,y+2,w-4,h*0.75-4);
+  cx.fillStyle='rgba(255,255,255,0.3)';for(var ln=0;ln<3;ln++)rr(x+4,y+5+ln*4,w*0.3+ln*w*0.15,1);
 }
 
-/** [FURN] 의자 — 이케아 MARKUS 스타일 */
-function drawChair(x,y,w,h){
-  /* 바퀴 */
-  cx.fillStyle='#424242';
-  rr(x+1,y+h-2,3,2);rr(x+w-4,y+h-2,3,2);
-  /* 기둥 */
+/** 의자 — IKEA MARKUS */
+function fChair(x,y,w,h){
+  cx.fillStyle='#424242';rr(x+1,y+h-2,3,2);rr(x+w-4,y+h-2,3,2);
   cx.fillStyle='#616161';rr(x+w*0.4,y+h*0.5,w*0.2,h*0.45);
-  /* 좌석 */
   cx.fillStyle='#37474F';rr(x,y+h*0.35,w,h*0.2);
-  /* 등받이 */
-  cx.fillStyle='#263238';rr(x+w*0.15,y,w*0.7,h*0.4);
-  cx.fillStyle='#37474F';rr(x+w*0.2,y+2,w*0.6,h*0.35);
+  cx.fillStyle='#263238';rr(x+w*0.15,y,w*0.7,h*0.4);cx.fillStyle='#37474F';rr(x+w*0.2,y+2,w*0.6,h*0.35);
 }
 
-/** [FURN] 소파 */
-function drawSofa(x,y,w,h){
-  cx.fillStyle='#5C6BC0';rr(x,y+h*0.2,w,h*0.7);
-  cx.fillStyle='#7986CB';rr(x+3,y+h*0.3,w-6,h*0.35);
-  /* 팔걸이 */
+/** 소파 */
+function fSofa(x,y,w,h){
+  cx.fillStyle='#5C6BC0';rr(x,y+h*0.2,w,h*0.7);cx.fillStyle='#7986CB';rr(x+3,y+h*0.3,w-6,h*0.35);
   cx.fillStyle='#3F51B5';rr(x,y+h*0.15,w*0.15,h*0.75);rr(x+w*0.85,y+h*0.15,w*0.15,h*0.75);
-  /* 쿠션 라인 */
   cx.fillStyle='#9FA8DA';rr(x+w*0.15+3,y+h*0.32,w*0.32,h*0.28);rr(x+w*0.52,y+h*0.32,w*0.32,h*0.28);
-  /* 다리 */
   cx.fillStyle='#BDB76B';rr(x+3,y+h-3,4,3);rr(x+w-7,y+h-3,4,3);
 }
 
-/** [FURN] 커피 테이블 */
-function drawCoffeeTable(x,y,w,h){
+/** 커피테이블 */
+function fCTable(x,y,w,h){
   cx.fillStyle='#BDBDBD';rr(x+2,y+h-3,3,4);rr(x+w-5,y+h-3,3,4);
-  cx.fillStyle='#E0E0E0';rr(x,y,w,h*0.4);
-  cx.fillStyle='#F5F5F5';rr(x+1,y+1,w-2,h*0.35);
-  /* 잡지 */
-  cx.fillStyle='#EF5350';rr(x+w*0.2,y+2,w*0.25,h*0.2);
-  cx.fillStyle='#42A5F5';rr(x+w*0.5,y+3,w*0.2,h*0.15);
+  cx.fillStyle='#E0E0E0';rr(x,y,w,h*0.4);cx.fillStyle='#F5F5F5';rr(x+1,y+1,w-2,h*0.35);
+  cx.fillStyle='#EF5350';rr(x+w*0.2,y+2,w*0.25,h*0.2);cx.fillStyle='#42A5F5';rr(x+w*0.5,y+3,w*0.2,h*0.15);
 }
 
-/** [FURN] 화분 */
-function drawPlant(x,y,w,h){
-  /* 화분 */
-  cx.fillStyle='#D7CCC8';rr(x+w*0.2,y+h*0.55,w*0.6,h*0.4);
-  cx.fillStyle='#BCAAA4';rr(x+w*0.15,y+h*0.55,w*0.7,h*0.1);
-  /* 흙 */
+/** 화분 */
+function fPlant(x,y,w,h){
+  cx.fillStyle='#D7CCC8';rr(x+w*0.2,y+h*0.55,w*0.6,h*0.4);cx.fillStyle='#BCAAA4';rr(x+w*0.15,y+h*0.55,w*0.7,h*0.1);
   cx.fillStyle='#5D4037';rr(x+w*0.25,y+h*0.5,w*0.5,h*0.08);
-  /* 잎 */
-  cx.fillStyle='#66BB6A';
-  cx.beginPath();cx.arc(x+w*0.5,y+h*0.3,w*0.32,0,Math.PI*2);cx.fill();
-  cx.fillStyle='#43A047';
-  cx.beginPath();cx.arc(x+w*0.4,y+h*0.22,w*0.2,0,Math.PI*2);cx.fill();
+  cx.fillStyle='#66BB6A';cx.beginPath();cx.arc(x+w*0.5,y+h*0.3,w*0.32,0,Math.PI*2);cx.fill();
+  cx.fillStyle='#43A047';cx.beginPath();cx.arc(x+w*0.4,y+h*0.22,w*0.2,0,Math.PI*2);cx.fill();
   cx.beginPath();cx.arc(x+w*0.6,y+h*0.25,w*0.18,0,Math.PI*2);cx.fill();
-  cx.fillStyle='#2E7D32';
-  cx.beginPath();cx.arc(x+w*0.5,y+h*0.15,w*0.12,0,Math.PI*2);cx.fill();
+  cx.fillStyle='#2E7D32';cx.beginPath();cx.arc(x+w*0.5,y+h*0.15,w*0.12,0,Math.PI*2);cx.fill();
 }
 
-/** [FURN] 카페 카운터 */
-function drawCounter(x,y,w,h){
-  cx.fillStyle='#5D4037';rr(x,y,w,h);
-  cx.fillStyle='#795548';rr(x+2,y+2,w-4,h*0.3);
+/** 카페 카운터 */
+function fCounter(x,y,w,h){
+  cx.fillStyle='#5D4037';rr(x,y,w,h);cx.fillStyle='#795548';rr(x+2,y+2,w-4,h*0.3);
   cx.fillStyle='#4E342E';rr(x,y+h*0.8,w,h*0.2);
-  /* 메뉴 보드 */
   cx.fillStyle='#263238';rr(x+w*0.3,y-20,w*0.4,18);
-  cx.fillStyle='#fff';cx.font='8px sans-serif';cx.textAlign='center';
-  cx.fillText('MENU',x+w*0.5,y-8);
+  cx.fillStyle='#fff';cx.font='8px sans-serif';cx.textAlign='center';cx.fillText('MENU',x+w*0.5,y-8);cx.textAlign='left';
 }
 
-/** [FURN] 커피머신 */
-function drawCoffeeMachine(x,y,w,h){
-  cx.fillStyle='#212121';rr(x,y,w,h);
-  cx.fillStyle='#424242';rr(x+2,y+2,w-4,h*0.5);
-  /* 버튼 */
-  cx.fillStyle='#F44336';rr(x+w*0.3,y+h*0.6,4,4);
-  cx.fillStyle='#4CAF50';rr(x+w*0.6,y+h*0.6,4,4);
-  /* 컵 위치 */
+/** 커피머신 */
+function fCoffee(x,y,w,h){
+  cx.fillStyle='#212121';rr(x,y,w,h);cx.fillStyle='#424242';rr(x+2,y+2,w-4,h*0.5);
+  cx.fillStyle='#F44336';rr(x+w*0.3,y+h*0.6,4,4);cx.fillStyle='#4CAF50';rr(x+w*0.6,y+h*0.6,4,4);
   cx.fillStyle='#795548';rr(x+w*0.25,y+h*0.75,w*0.5,h*0.2);
-  /* 스팀 */
-  cx.fillStyle='rgba(255,255,255,0.15)';
-  rr(x+w*0.4,y-4+Math.sin(TICK*0.1)*2,3,4);
+  cx.fillStyle='rgba(255,255,255,0.15)';rr(x+w*0.4,y-4+Math.sin(TICK*0.1)*2,3,4);
 }
 
-/** [FURN] 바 스툴 */
-function drawStool(x,y,w,h){
+/** 바 스툴 */
+function fStool(x,y,w,h){
   cx.fillStyle='#757575';rr(x+w*0.35,y+h*0.4,w*0.3,h*0.6);
-  cx.fillStyle='#424242';rr(x,y,w,h*0.4);
-  cx.fillStyle='#616161';rr(x+1,y+1,w-2,h*0.35);
+  cx.fillStyle='#424242';rr(x,y,w,h*0.4);cx.fillStyle='#616161';rr(x+1,y+1,w-2,h*0.35);
 }
 
-/** [FURN] 책꽂이 */
-function drawBookshelf(x,y,w,h){
-  cx.fillStyle='#D7CCC8';rr(x,y,w,h);
-  cx.fillStyle='#EFEBE9';rr(x+1,y+1,w-2,h-2);
-  /* 선반 */
-  var bColors=['#E74C3C','#3498DB','#2ECC71','#F39C12','#9B59B6','#FF6B6B','#26A69A','#EC407A'];
+/** 책꽂이 */
+function fBookshelf(x,y,w,h){
+  cx.fillStyle='#D7CCC8';rr(x,y,w,h);cx.fillStyle='#EFEBE9';rr(x+1,y+1,w-2,h-2);
+  var bc=['#E74C3C','#3498DB','#2ECC71','#F39C12','#9B59B6','#FF6B6B','#26A69A','#EC407A'];
   for(var sh=0;sh<4;sh++){
-    var sy=y+4+sh*h*0.24;
-    cx.fillStyle='#BCAAA4';rr(x+1,sy+h*0.18,w-2,2);
-    /* 책 */
-    for(var bk=0;bk<5;bk++){
-      cx.fillStyle=bColors[(sh*5+bk)%bColors.length];
-      rr(x+3+bk*6,sy,5,h*0.17);
-    }
+    var sy=y+4+sh*h*0.24;cx.fillStyle='#BCAAA4';rr(x+1,sy+h*0.18,w-2,2);
+    for(var bk=0;bk<5;bk++){cx.fillStyle=bc[(sh*5+bk)%bc.length];rr(x+3+bk*6,sy,5,h*0.17);}
   }
 }
 
-/** [FURN] 화이트보드 */
-function drawWhiteboard(x,y,w,h){
-  cx.fillStyle='#BDBDBD';rr(x,y,w,h+6);
-  cx.fillStyle='#FAFAFA';rr(x+2,y+2,w-4,h);
-  /* 내용 */
-  cx.fillStyle='#E74C3C';rr(x+6,y+4,w*0.3,1);
-  cx.fillStyle='#2196F3';rr(x+6,y+7,w*0.5,1);
-  cx.fillStyle='#4CAF50';rr(x+6,y+10,w*0.2,1);
-  /* 마커 */
-  cx.fillStyle='#F44336';rr(x+w-10,y+h+2,3,4);
-  cx.fillStyle='#2196F3';rr(x+w-6,y+h+2,3,4);
+/** 화이트보드 */
+function fWB(x,y,w,h){
+  cx.fillStyle='#BDBDBD';rr(x,y,w,h+6);cx.fillStyle='#FAFAFA';rr(x+2,y+2,w-4,h);
+  cx.fillStyle='#E74C3C';rr(x+6,y+4,w*0.3,1);cx.fillStyle='#2196F3';rr(x+6,y+7,w*0.5,1);cx.fillStyle='#4CAF50';rr(x+6,y+10,w*0.2,1);
+  cx.fillStyle='#F44336';rr(x+w-10,y+h+2,3,4);cx.fillStyle='#2196F3';rr(x+w-6,y+h+2,3,4);
 }
 
-/** [FURN] 프린터 */
-function drawPrinter(x,y,w,h){
-  cx.fillStyle='#ECEFF1';rr(x,y,w,h);
-  cx.fillStyle='#CFD8DC';rr(x+2,y+2,w-4,h*0.4);
+/** 프린터 */
+function fPrinter(x,y,w,h){
+  cx.fillStyle='#ECEFF1';rr(x,y,w,h);cx.fillStyle='#CFD8DC';rr(x+2,y+2,w-4,h*0.4);
   cx.fillStyle='#B0BEC5';rr(x+w*0.3,y+h*0.5,w*0.4,h*0.15);
-  /* 용지 */
   cx.fillStyle='#fff';rr(x+w*0.2,y-3,w*0.6,5);
-  /* LED */
   cx.fillStyle=TICK%60<30?'#4CAF50':'#1B5E20';rr(x+w*0.8,y+h*0.6,3,3);
 }
 
-/** [FURN] 워터쿨러 */
-function drawWaterCooler(x,y,w,h){
+/** 워터쿨러 */
+function fWater(x,y,w,h){
   cx.fillStyle='#E0E0E0';rr(x,y+h*0.4,w,h*0.6);
-  /* 물통 */
-  cx.fillStyle='#B3E5FC';rr(x+w*0.2,y,w*0.6,h*0.45);
-  cx.fillStyle='#81D4FA';rr(x+w*0.25,y+2,w*0.5,h*0.4);
-  /* 수도꼭지 */
+  cx.fillStyle='#B3E5FC';rr(x+w*0.2,y,w*0.6,h*0.45);cx.fillStyle='#81D4FA';rr(x+w*0.25,y+2,w*0.5,h*0.4);
   cx.fillStyle='#757575';rr(x+w*0.35,y+h*0.45,w*0.3,h*0.08);
-  /* 컵 */
   cx.fillStyle='#fff';rr(x+w*0.1,y+h*0.8,w*0.2,h*0.15);
 }
 
-/** [FURN] 회의 테이블 */
-function drawMeetingTable(x,y,w,h){
+/** 회의 테이블 */
+function fMTable(x,y,w,h){
   cx.fillStyle='#8D6E63';rr(x+3,y+h-4,4,5);rr(x+w-7,y+h-4,4,5);
-  cx.fillStyle='#BCAAA4';rr(x,y,w,h*0.4);
-  cx.fillStyle='#D7CCC8';rr(x+2,y+2,w-4,h*0.35);
+  cx.fillStyle='#BCAAA4';rr(x,y,w,h*0.4);cx.fillStyle='#D7CCC8';rr(x+2,y+2,w-4,h*0.35);
 }
 
-/** [FURN] 회의 의자 */
-function drawMeetingChair(x,y,w,h){
+/** 회의 의자 */
+function fMChair(x,y,w,h){
   cx.fillStyle='#616161';rr(x+w*0.3,y+h*0.5,w*0.4,h*0.5);
-  cx.fillStyle='#455A64';rr(x,y,w,h*0.55);
-  cx.fillStyle='#546E7A';rr(x+1,y+1,w-2,h*0.5);
+  cx.fillStyle='#455A64';rr(x,y,w,h*0.55);cx.fillStyle='#546E7A';rr(x+1,y+1,w-2,h*0.5);
 }
 
-/** [FURN] 프로젝터 스크린 */
-function drawScreen(x,y,w,h){
-  cx.fillStyle='#E0E0E0';rr(x,y,w,h+15);
-  cx.fillStyle='#FAFAFA';rr(x+2,y+2,w-4,h+10);
-  /* 슬라이드 내용 */
-  cx.fillStyle='#1565C0';rr(x+w*0.1,y+5,w*0.8,4);
-  cx.fillStyle='#42A5F5';rr(x+w*0.1,y+11,w*0.5,2);
+/** 프로젝터 스크린 */
+function fScreen(x,y,w,h){
+  cx.fillStyle='#E0E0E0';rr(x,y,w,h+15);cx.fillStyle='#FAFAFA';rr(x+2,y+2,w-4,h+10);
+  cx.fillStyle='#1565C0';rr(x+w*0.1,y+5,w*0.8,4);cx.fillStyle='#42A5F5';rr(x+w*0.1,y+11,w*0.5,2);
 }
 
 /* ============================================
-   [SEC-10] 캐릭터 렌더링 — 100가지 스타일
+   [SEC-10] 캐릭터 렌더링 — 100가지 스타일 픽셀아트
    ============================================ */
-function drawPerson(p){
-  if(p.floor!==curFloor) return;
 
-  var winBot=34+H*0.48-viewY*H*0.15;
-  var px=p.rx*W+(viewX-0.5)*-80;
-  var py=winBot+(p.ry-0.48)*H*1.1+viewY*30;
-  var s=1.5*viewZoom; /* 스프라이트 스케일 */
+/**
+ * 캐릭터 1명 그리기
+ * — 16x24 픽셀 기반 스프라이트를 캔버스에 직접 그림
+ * — 외형: 피부, 머리, 셔츠(4가지 디테일), 바지, 신발,
+ *         머리스타일 10종, 액세서리 10종
+ * — 포즈: 서기/앉기/걷기/커피들기/댄스
+ */
+function drawPerson(p){
+  if(p.floor !== curFloor) return;
+
+  var winBot = 34 + H*0.48 - viewY*H*0.15;
+  var px = p.rx*W + (viewX-0.5)*-80;
+  var py = winBot + (p.ry-0.48)*H*1.1 + viewY*30;
+  var s = 1.5 * viewZoom;
 
   /* 화면 밖 컬링 */
-  if(px<-40||px>W+40||py<0||py>H+40) return;
+  if(px < -50 || px > W+50 || py < -20 || py > H+50) return;
 
-  /* 걷기 애니메이션 */
-  var legOff=0,armOff=0;
-  if(p.walking&&p.tx!==null){
-    legOff=[0,-1,0,1][p.frame];
-    armOff=[0,1,0,-1][p.frame];
+  /* 걷기 오프셋 */
+  var legOff=0, armOff=0;
+  if(p.walking && p.tx !== null){
+    legOff = [0,-1,0,1][p.frame];
+    armOff = [0,1,0,-1][p.frame];
   }
 
-  /* 앉아있는 사람 */
-  var sitOff=p.sitting?-3:0;
+  /* 댄스 오프셋 */
+  var danceOff = 0;
+  if(p.dancing){
+    danceOff = Math.sin(TICK*0.2)*3;
+    legOff = Math.round(Math.sin(TICK*0.3)*2);
+    armOff = Math.round(Math.cos(TICK*0.3)*2);
+  }
+
+  var sitOff = p.sitting ? -3 : 0;
+  py += danceOff;
 
   /* 호버/선택 글로우 */
-  if(p===hoverPerson||p.selected){
-    cx.shadowColor=p.selected?'#4ECDC4':'#FFD93D';
-    cx.shadowBlur=12;
+  if(p === hoverPerson || p.selected){
+    cx.shadowColor = p.selected ? '#4ECDC4' : '#FFD93D';
+    cx.shadowBlur = 12;
   }
 
   /* --- 그림자 --- */
-  cx.fillStyle='rgba(0,0,0,0.1)';
-  cx.beginPath();cx.ellipse(px+8*s,py+24*s,7*s,2*s,0,0,Math.PI*2);cx.fill();
+  cx.fillStyle = 'rgba(0,0,0,0.1)';
+  cx.beginPath(); cx.ellipse(px+8*s, py+24*s-danceOff, 7*s, 2*s, 0, 0, Math.PI*2); cx.fill();
 
   /* --- 다리 --- */
   if(!p.sitting){
-    cx.fillStyle=p.pants;
-    rr(px+(5+legOff)*s,py+17*s,3*s,5*s);
-    rr(px+(9-legOff)*s,py+17*s,3*s,5*s);
-    cx.fillStyle='#1A1A1A';
-    rr(px+(4+legOff)*s,py+22*s,4*s,2*s);
-    rr(px+(9-legOff)*s,py+22*s,4*s,2*s);
+    cx.fillStyle = p.pants;
+    rr(px+(5+legOff)*s, py+17*s, 3*s, 5*s);
+    rr(px+(9-legOff)*s, py+17*s, 3*s, 5*s);
+    cx.fillStyle = '#1A1A1A';
+    rr(px+(4+legOff)*s, py+22*s, 4*s, 2*s);
+    rr(px+(9-legOff)*s, py+22*s, 4*s, 2*s);
   } else {
-    /* 앉은 다리 */
-    cx.fillStyle=p.pants;
-    rr(px+4*s,py+17*s+sitOff,4*s,3*s);
-    rr(px+9*s,py+17*s+sitOff,4*s,3*s);
-    cx.fillStyle='#1A1A1A';
-    rr(px+4*s,py+20*s+sitOff,4*s,2*s);
-    rr(px+9*s,py+20*s+sitOff,4*s,2*s);
+    cx.fillStyle = p.pants;
+    rr(px+4*s, py+17*s+sitOff, 4*s, 3*s);
+    rr(px+9*s, py+17*s+sitOff, 4*s, 3*s);
+    cx.fillStyle = '#1A1A1A';
+    rr(px+4*s, py+20*s+sitOff, 4*s, 2*s);
+    rr(px+9*s, py+20*s+sitOff, 4*s, 2*s);
   }
 
   /* --- 몸통 --- */
-  cx.fillStyle=p.shirt;
-  rr(px+4*s,py+9*s+sitOff,9*s,8*s);
-  /* 셔츠 디테일 */
-  if(p.id%4===0){cx.fillStyle='rgba(255,255,255,0.15)';rr(px+4*s,py+11*s+sitOff,9*s,s);rr(px+4*s,py+14*s+sitOff,9*s,s);}
-  else if(p.id%4===1){cx.fillStyle='rgba(255,255,255,0.35)';rr(px+5*s,py+9*s+sitOff,7*s,2*s);}
-  else if(p.id%4===2){cx.fillStyle='rgba(0,0,0,0.08)';rr(px+7*s,py+10*s+sitOff,3*s,6*s);}
+  cx.fillStyle = p.shirt;
+  rr(px+4*s, py+9*s+sitOff, 9*s, 8*s);
+
+  /* 셔츠 디테일 (4가지 패턴) */
+  if(p.id%4===0){ /* 줄무늬 */
+    cx.fillStyle='rgba(255,255,255,0.15)';rr(px+4*s,py+11*s+sitOff,9*s,s);rr(px+4*s,py+14*s+sitOff,9*s,s);
+  }else if(p.id%4===1){ /* 칼라 */
+    cx.fillStyle='rgba(255,255,255,0.35)';rr(px+5*s,py+9*s+sitOff,7*s,2*s);
+  }else if(p.id%4===2){ /* 중앙 라인 */
+    cx.fillStyle='rgba(0,0,0,0.08)';rr(px+7*s,py+10*s+sitOff,3*s,6*s);
+  }else{ /* 포켓 */
+    cx.fillStyle='rgba(0,0,0,0.06)';rr(px+5*s,py+13*s+sitOff,3*s,2*s);
+  }
 
   /* --- 팔 --- */
-  cx.fillStyle=p.skin;
-  if(p.state.indexOf('커피')>-1){
+  cx.fillStyle = p.skin;
+  if(/커피/.test(p.state)){
     /* 커피 들고 있는 포즈 */
-    rr(px+2*s,py+10*s+sitOff,2*s,4*s);
-    rr(px+13*s,py+10*s+sitOff,2*s,3*s);
-    /* 컵 */
-    cx.fillStyle='#fff';rr(px+13*s,py+13*s+sitOff,3*s,4*s);
-    cx.fillStyle='#795548';rr(px+13.5*s,py+13.5*s+sitOff,2*s,2.5*s);
-    /* 스팀 */
-    cx.fillStyle='rgba(255,255,255,0.3)';
-    rr(px+14*s,py+11*s+sitOff+Math.sin(TICK*0.15)*s,s,2*s);
+    rr(px+2*s, py+10*s+sitOff, 2*s, 4*s);
+    rr(px+13*s, py+10*s+sitOff, 2*s, 3*s);
+    cx.fillStyle='#fff'; rr(px+13*s, py+13*s+sitOff, 3*s, 4*s);
+    cx.fillStyle='#795548'; rr(px+13.5*s, py+13.5*s+sitOff, 2*s, 2.5*s);
+    cx.fillStyle='rgba(255,255,255,0.3)'; rr(px+14*s, py+11*s+sitOff+Math.sin(TICK*0.15)*s, s, 2*s);
   } else {
-    rr(px+(2+armOff)*s,py+10*s+sitOff,2*s,6*s);
-    rr(px+(13-armOff)*s,py+10*s+sitOff,2*s,6*s);
+    rr(px+(2+armOff)*s, py+10*s+sitOff, 2*s, 6*s);
+    rr(px+(13-armOff)*s, py+10*s+sitOff, 2*s, 6*s);
   }
   /* 소매 */
-  cx.fillStyle=p.shirt;
-  rr(px+(2+armOff)*s,py+10*s+sitOff,2*s,2*s);
-  rr(px+(13-armOff)*s,py+10*s+sitOff,2*s,2*s);
+  cx.fillStyle = p.shirt;
+  rr(px+(2+((/커피/.test(p.state))?0:armOff))*s, py+10*s+sitOff, 2*s, 2*s);
+  rr(px+(13-((/커피/.test(p.state))?0:armOff))*s, py+10*s+sitOff, 2*s, 2*s);
 
-  /* --- 머리 --- */
-  cx.fillStyle=p.skin;
-  rr(px+4*s,py+1*s+sitOff,8*s,8*s);
+  /* --- 머리 (피부) --- */
+  cx.fillStyle = p.skin;
+  rr(px+4*s, py+1*s+sitOff, 8*s, 8*s);
 
-  /* 눈 */
-  if(p.dir!==2){
-    cx.fillStyle='#222';
-    var exL=p.dir===1?5:p.dir===3?7:6;
-    var exR=p.dir===1?8:p.dir===3?11:10;
-    rr(px+exL*s,py+4*s+sitOff,s,2*s);
-    rr(px+exR*s,py+4*s+sitOff,s,2*s);
-    cx.fillStyle='#fff';
-    rr(px+exL*s,py+4*s+sitOff,s,s);
-    rr(px+exR*s,py+4*s+sitOff,s,s);
+  /* --- 눈 --- */
+  if(p.dir !== 2){
+    cx.fillStyle = '#222';
+    var exL = p.dir===1?5:p.dir===3?7:6;
+    var exR = p.dir===1?8:p.dir===3?11:10;
+    rr(px+exL*s, py+4*s+sitOff, s, 2*s);
+    rr(px+exR*s, py+4*s+sitOff, s, 2*s);
+    /* 하이라이트 */
+    cx.fillStyle = '#fff';
+    rr(px+exL*s, py+4*s+sitOff, s, s);
+    rr(px+exR*s, py+4*s+sitOff, s, s);
     /* 입 */
-    cx.fillStyle=p.bubble?'#E57373':'#CC9999';
-    rr(px+7*s,py+7*s+sitOff,(p.bubble?3:2)*s,s);
+    cx.fillStyle = p.bubble ? '#E57373' : '#CC9999';
+    rr(px+7*s, py+7*s+sitOff, (p.bubble?3:2)*s, s);
     /* 볼터치 */
-    cx.fillStyle='rgba(255,150,150,0.25)';
-    rr(px+4*s,py+6*s+sitOff,2*s,s);
-    rr(px+11*s,py+6*s+sitOff,2*s,s);
+    cx.fillStyle = 'rgba(255,150,150,0.25)';
+    rr(px+4*s, py+6*s+sitOff, 2*s, s);
+    rr(px+11*s, py+6*s+sitOff, 2*s, s);
   }
 
-  /* --- 머리카락 --- */
-  cx.fillStyle=p.hair;
+  /* --- 머리카락 (10종) --- */
+  cx.fillStyle = p.hair;
   switch(p.hstyle){
-    case'short':rr(px+4*s,py+sitOff,8*s,3*s);rr(px+3*s,py+s+sitOff,2*s,3*s);rr(px+11*s,py+s+sitOff,2*s,3*s);break;
-    case'long':rr(px+3*s,py+sitOff,10*s,3*s);rr(px+3*s,py+s+sitOff,2*s,7*s);rr(px+12*s,py+s+sitOff,2*s,7*s);break;
-    case'mohawk':rr(px+6*s,py-2*s+sitOff,4*s,4*s);rr(px+7*s,py-3*s+sitOff,2*s,2*s);break;
-    case'bun':rr(px+4*s,py+sitOff,8*s,2*s);rr(px+6*s,py-2*s+sitOff,4*s,3*s);break;
-    case'curly':rr(px+3*s,py-s+sitOff,10*s,4*s);rr(px+2*s,py+s+sitOff,3*s,4*s);rr(px+12*s,py+s+sitOff,3*s,4*s);break;
-    case'ponytail':rr(px+4*s,py+sitOff,8*s,3*s);rr(px+11*s,py+2*s+sitOff,3*s,8*s);break;
-    case'buzz':rr(px+4*s,py+sitOff,8*s,2*s);break;
-    case'side':rr(px+3*s,py+sitOff,10*s,3*s);rr(px+3*s,py+s+sitOff,3*s,5*s);break;
-    case'afro':rr(px+2*s,py-2*s+sitOff,12*s,5*s);rr(px+s,py+sitOff,3*s,5*s);rr(px+12*s,py+sitOff,3*s,5*s);break;
-    case'bald':break;
+    case 'short': rr(px+4*s,py+sitOff,8*s,3*s);rr(px+3*s,py+s+sitOff,2*s,3*s);rr(px+11*s,py+s+sitOff,2*s,3*s);break;
+    case 'long': rr(px+3*s,py+sitOff,10*s,3*s);rr(px+3*s,py+s+sitOff,2*s,7*s);rr(px+12*s,py+s+sitOff,2*s,7*s);break;
+    case 'mohawk': rr(px+6*s,py-2*s+sitOff,4*s,4*s);rr(px+7*s,py-3*s+sitOff,2*s,2*s);break;
+    case 'bun': rr(px+4*s,py+sitOff,8*s,2*s);rr(px+6*s,py-2*s+sitOff,4*s,3*s);break;
+    case 'curly': rr(px+3*s,py-s+sitOff,10*s,4*s);rr(px+2*s,py+s+sitOff,3*s,4*s);rr(px+12*s,py+s+sitOff,3*s,4*s);break;
+    case 'ponytail': rr(px+4*s,py+sitOff,8*s,3*s);rr(px+11*s,py+2*s+sitOff,3*s,8*s);break;
+    case 'buzz': rr(px+4*s,py+sitOff,8*s,2*s);break;
+    case 'side': rr(px+3*s,py+sitOff,10*s,3*s);rr(px+3*s,py+s+sitOff,3*s,5*s);break;
+    case 'afro': rr(px+2*s,py-2*s+sitOff,12*s,5*s);rr(px+s,py+sitOff,3*s,5*s);rr(px+12*s,py+sitOff,3*s,5*s);break;
+    case 'bald': break;
   }
 
-  /* --- 액세서리 --- */
+  /* --- 액세서리 (10종) --- */
   switch(p.acc){
-    case'glasses':if(p.dir===0){cx.fillStyle='#333';rr(px+5*s,py+3.5*s+sitOff,3*s,2.5*s);rr(px+9*s,py+3.5*s+sitOff,3*s,2.5*s);rr(px+8*s,py+4*s+sitOff,s,s);}break;
-    case'sunglasses':if(p.dir===0){cx.fillStyle='#1A1A1A';rr(px+5*s,py+3*s+sitOff,3*s,3*s);rr(px+9*s,py+3*s+sitOff,3*s,3*s);rr(px+8*s,py+4*s+sitOff,s,s);}break;
-    case'hat':cx.fillStyle='#5D4037';rr(px+2*s,py-s+sitOff,12*s,2*s);rr(px+4*s,py-4*s+sitOff,8*s,4*s);break;
-    case'cap':cx.fillStyle=p.shirt;rr(px+3*s,py-s+sitOff,11*s,2*s);rr(px+4*s,py-2*s+sitOff,8*s,2*s);break;
-    case'headband':cx.fillStyle='#E74C3C';rr(px+4*s,py+s+sitOff,8*s,s);break;
-    case'earring':cx.fillStyle='#FFD700';rr(px+3*s,py+5*s+sitOff,s,s);break;
-    case'mask':if(p.dir===0){cx.fillStyle='#fff';rr(px+5*s,py+6*s+sitOff,6*s,3*s);}break;
-    case'scarf':cx.fillStyle='#E74C3C';rr(px+4*s,py+8*s+sitOff,9*s,2*s);break;
-    case'bowtie':cx.fillStyle='#E74C3C';rr(px+6*s,py+9*s+sitOff,4*s,2*s);cx.fillStyle='#B71C1C';rr(px+7*s,py+9.5*s+sitOff,2*s,s);break;
+    case 'glasses': if(p.dir===0){cx.fillStyle='#333';rr(px+5*s,py+3.5*s+sitOff,3*s,2.5*s);rr(px+9*s,py+3.5*s+sitOff,3*s,2.5*s);rr(px+8*s,py+4*s+sitOff,s,s);}break;
+    case 'sunglasses': if(p.dir===0){cx.fillStyle='#1A1A1A';rr(px+5*s,py+3*s+sitOff,3*s,3*s);rr(px+9*s,py+3*s+sitOff,3*s,3*s);rr(px+8*s,py+4*s+sitOff,s,s);}break;
+    case 'hat': cx.fillStyle='#5D4037';rr(px+2*s,py-s+sitOff,12*s,2*s);rr(px+4*s,py-4*s+sitOff,8*s,4*s);break;
+    case 'cap': cx.fillStyle=p.shirt;rr(px+3*s,py-s+sitOff,11*s,2*s);rr(px+4*s,py-2*s+sitOff,8*s,2*s);break;
+    case 'headband': cx.fillStyle='#E74C3C';rr(px+4*s,py+s+sitOff,8*s,s);break;
+    case 'earring': cx.fillStyle='#FFD700';rr(px+3*s,py+5*s+sitOff,s,s);break;
+    case 'mask': if(p.dir===0){cx.fillStyle='#fff';rr(px+5*s,py+6*s+sitOff,6*s,3*s);}break;
+    case 'scarf': cx.fillStyle='#E74C3C';rr(px+4*s,py+8*s+sitOff,9*s,2*s);rr(px+6*s,py+10*s+sitOff,2*s,3*s);break;
+    case 'bowtie': cx.fillStyle='#E74C3C';rr(px+6*s,py+9*s+sitOff,4*s,2*s);cx.fillStyle='#B71C1C';rr(px+7*s,py+9.5*s+sitOff,2*s,s);break;
   }
 
   /* 그림자 리셋 */
-  cx.shadowBlur=0;
+  cx.shadowBlur = 0;
 
   /* --- 선택 마커 --- */
   if(p.selected){
@@ -1041,149 +1047,137 @@ function drawPerson(p){
   }
 
   /* --- 이름 태그 --- */
-  cx.font='bold 9px "Segoe UI",sans-serif';cx.textAlign='center';
-  cx.fillStyle='rgba(0,0,0,0.4)';cx.fillText(p.name,px+8*s+1,py-5+sitOff+1);
-  cx.fillStyle=p.selected?'#4ECDC4':'rgba(60,60,60,0.9)';
-  cx.fillText(p.name,px+8*s,py-5+sitOff);
+  cx.font = 'bold 9px "Segoe UI",sans-serif';
+  cx.textAlign = 'center';
+  cx.fillStyle = 'rgba(0,0,0,0.4)'; cx.fillText(p.name, px+8*s+1, py-5+sitOff+1);
+  cx.fillStyle = p.selected ? '#4ECDC4' : 'rgba(60,60,60,0.9)';
+  cx.fillText(p.name, px+8*s, py-5+sitOff);
 
   /* --- 말풍선 --- */
-  if(p.bubble&&p.bubble.timer>0){
-    drawBubble(px+8*s,py-18+sitOff,p.bubble.text,p.bubble.type);
+  if(p.bubble && p.bubble.timer > 0){
+    drawBubble(px+8*s, py-18+sitOff, p.bubble.text, p.bubble.type);
   }
 
   /* --- 이모지 --- */
-  if(p.emoji&&p.emoji.timer>0){
-    cx.font='16px serif';cx.textAlign='center';
-    var emoY=py-22+sitOff-(60-p.emoji.timer)*0.5;
-    cx.globalAlpha=Math.min(1,p.emoji.timer/20);
-    cx.fillText(p.emoji.char,px+8*s,emoY);
-    cx.globalAlpha=1;
+  if(p.emoji && p.emoji.timer > 0){
+    cx.font = '16px serif'; cx.textAlign = 'center';
+    var emoY = py - 22 + sitOff - (60 - p.emoji.timer)*0.5;
+    cx.globalAlpha = Math.min(1, p.emoji.timer / 20);
+    cx.fillText(p.emoji.char, px+8*s, emoY);
+    cx.globalAlpha = 1;
   }
 
-  /* 히트박스 저장 (클릭/호버 감지용) */
-  p._sx=px;p._sy=py+sitOff;p._sw=18*s;p._sh=26*s;
+  /* 히트박스 저장 */
+  p._sx = px; p._sy = py + sitOff - 6;
+  p._sw = 18*s; p._sh = 30*s;
 }
 
-/** 말풍선 */
+/** 말풍선 그리기 */
 function drawBubble(x,y,text,type){
   cx.font='10px "Segoe UI",sans-serif';
   var tw=cx.measureText(text).width;
-  var bw=Math.min(tw+14,180);
-  var bh=20;
-  var bx=x-bw/2,by=y-bh-6;
-
-  cx.fillStyle=type==='dm'?'rgba(239,83,80,0.9)':'rgba(255,255,255,0.93)';
+  var bw=Math.min(tw+14,180), bh=20;
+  var bx=x-bw/2, by=y-bh-6;
+  cx.fillStyle = type==='dm'?'rgba(239,83,80,0.9)':'rgba(255,255,255,0.93)';
   cx.beginPath();
-  cx.moveTo(bx+5,by);cx.lineTo(bx+bw-5,by);
-  cx.quadraticCurveTo(bx+bw,by,bx+bw,by+5);cx.lineTo(bx+bw,by+bh-5);
-  cx.quadraticCurveTo(bx+bw,by+bh,bx+bw-5,by+bh);
+  cx.moveTo(bx+5,by);cx.lineTo(bx+bw-5,by);cx.quadraticCurveTo(bx+bw,by,bx+bw,by+5);
+  cx.lineTo(bx+bw,by+bh-5);cx.quadraticCurveTo(bx+bw,by+bh,bx+bw-5,by+bh);
   cx.lineTo(x+4,by+bh);cx.lineTo(x,by+bh+5);cx.lineTo(x-3,by+bh);
   cx.lineTo(bx+5,by+bh);cx.quadraticCurveTo(bx,by+bh,bx,by+bh-5);
   cx.lineTo(bx,by+5);cx.quadraticCurveTo(bx,by,bx+5,by);cx.closePath();cx.fill();
-
   cx.strokeStyle=type==='dm'?'rgba(200,60,60,0.3)':'rgba(0,0,0,0.1)';cx.lineWidth=1;cx.stroke();
-
   cx.fillStyle=type==='dm'?'#fff':'#333';cx.textAlign='center';
-  var dt2=text.length>22?text.substring(0,21)+'…':text;
-  cx.fillText(dt2,x,by+14);
+  cx.fillText(text.length>22?text.substring(0,21)+'…':text,x,by+14);
 }
 
 /* ============================================
-   [SEC-11] 물리엔진 — 사람-사람, 사람-가구 충돌
+   [SEC-11] 물리엔진 — 사람↔사람, 사람↔가구 충돌
    ============================================ */
 function physics(){
-  var i,j,p,q,dx,dy,dist,overlap,nx,ny;
+  var i, j, p, q, dx, dy, dist, overlap, nx, ny;
+  var fp = [];
 
-  for(i=0;i<people.length;i++){
-    p=people[i];
-    if(p.floor!==curFloor) continue;
+  /* 현재 층 사람만 추출 */
+  for(i=0;i<people.length;i++) if(people[i].floor===curFloor) fp.push(people[i]);
+
+  for(i=0;i<fp.length;i++){
+    p = fp[i];
 
     /* --- 이동 목표 추적 --- */
-    if(p.tx!==null){
-      dx=p.tx-p.rx;
-      dy=p.ty-p.ry;
-      dist=Math.sqrt(dx*dx+dy*dy);
-      if(dist>0.005){
-        var spd=p.selected?0.004:0.002;
-        p.vx=dx/dist*spd;
-        p.vy=dy/dist*spd;
-        p.walking=true;
-        /* 방향 */
-        if(Math.abs(dx)>Math.abs(dy)) p.dir=dx>0?3:1;
-        else p.dir=dy>0?0:2;
-        /* 걷기 프레임 */
+    if(p.tx !== null){
+      dx = p.tx - p.rx;
+      dy = p.ty - p.ry;
+      dist = Math.sqrt(dx*dx + dy*dy);
+      if(dist > 0.005){
+        var spd = p.selected ? 0.004 : 0.002;
+        p.vx = dx/dist * spd;
+        p.vy = dy/dist * spd;
+        p.walking = true;
+        if(Math.abs(dx) > Math.abs(dy)) p.dir = dx > 0 ? 3 : 1;
+        else p.dir = dy > 0 ? 0 : 2;
         p.animT++;
-        if(p.animT>8){p.frame=(p.frame+1)%4;p.animT=0;}
+        if(p.animT > 8){ p.frame = (p.frame+1)%4; p.animT = 0; }
       } else {
-        p.tx=null;p.ty=null;
-        p.vx*=0.5;p.vy*=0.5;
-        if(!p.state.match(/이동|인사|카페/)) p.walking=false;
+        p.tx = null; p.ty = null;
+        p.vx *= 0.5; p.vy *= 0.5;
+        if(!/이동|인사|카페/.test(p.state)) p.walking = false;
       }
     }
 
     /* --- 속도 적용 --- */
-    p.rx+=p.vx;
-    p.ry+=p.vy;
+    p.rx += p.vx;
+    p.ry += p.vy;
 
     /* --- 마찰 --- */
-    p.vx*=0.92;
-    p.vy*=0.92;
-    if(Math.abs(p.vx)<0.0001)p.vx=0;
-    if(Math.abs(p.vy)<0.0001)p.vy=0;
+    p.vx *= 0.92;
+    p.vy *= 0.92;
+    if(Math.abs(p.vx) < 0.0001) p.vx = 0;
+    if(Math.abs(p.vy) < 0.0001) p.vy = 0;
 
     /* --- 경계 제한 --- */
-    p.rx=Math.max(0.05,Math.min(0.95,p.rx));
-    p.ry=Math.max(0.52,Math.min(0.90,p.ry));
+    p.rx = Math.max(0.05, Math.min(0.95, p.rx));
+    p.ry = Math.max(0.52, Math.min(0.90, p.ry));
   }
 
-  /* --- 사람-사람 충돌 --- */
-  var floorPeople=people.filter(function(pp){return pp.floor===curFloor;});
-  for(i=0;i<floorPeople.length;i++){
-    for(j=i+1;j<floorPeople.length;j++){
-      p=floorPeople[i];
-      q=floorPeople[j];
-      dx=q.rx-p.rx;
-      dy=q.ry-p.ry;
-      dist=Math.sqrt(dx*dx+dy*dy);
-      var minDist=0.025; /* 최소 거리 (비율) */
-      if(dist<minDist&&dist>0){
-        overlap=(minDist-dist)/2;
-        nx=dx/dist;
-        ny=dy/dist;
-        p.rx-=nx*overlap;
-        p.ry-=ny*overlap;
-        q.rx+=nx*overlap;
-        q.ry+=ny*overlap;
-        /* 속도 교환 (탄성 충돌) */
-        var tmpvx=p.vx;var tmpvy=p.vy;
-        p.vx=q.vx*0.3;p.vy=q.vy*0.3;
-        q.vx=tmpvx*0.3;q.vy=tmpvy*0.3;
+  /* --- 사람↔사람 충돌 --- */
+  for(i=0;i<fp.length;i++){
+    for(j=i+1;j<fp.length;j++){
+      p = fp[i]; q = fp[j];
+      dx = q.rx - p.rx;
+      dy = q.ry - p.ry;
+      dist = Math.sqrt(dx*dx + dy*dy);
+      var minD = 0.025;
+      if(dist < minD && dist > 0.0001){
+        overlap = (minD - dist) / 2;
+        nx = dx/dist; ny = dy/dist;
+        p.rx -= nx * overlap;
+        p.ry -= ny * overlap;
+        q.rx += nx * overlap;
+        q.ry += ny * overlap;
+        /* 탄성 충돌 속도 교환 */
+        var tvx=p.vx, tvy=p.vy;
+        p.vx = q.vx*0.3; p.vy = q.vy*0.3;
+        q.vx = tvx*0.3; q.vy = tvy*0.3;
       }
     }
   }
 
-  /* --- 사람-가구 충돌 --- */
-  for(i=0;i<floorPeople.length;i++){
-    p=floorPeople[i];
+  /* --- 사람↔가구 충돌 --- */
+  for(i=0;i<fp.length;i++){
+    p = fp[i];
     for(j=0;j<furniture.length;j++){
-      var f=furniture[j];
-      if(f.floor!==curFloor) continue;
-      /* 가구를 통과 못하는 타입만 */
+      var f = furniture[j];
+      if(f.floor !== curFloor) continue;
       if(f.type==='desk'||f.type==='counter'||f.type==='mtable'||f.type==='bookshelf'){
-        var fHalfW=f.w*0.5/W;
-        var fHalfH=f.h*0.5/H;
-        dx=p.rx-f.rx;
-        dy=p.ry-f.ry;
-        var overX=fHalfW+0.012-Math.abs(dx);
-        var overY=fHalfH+0.008-Math.abs(dy);
-        if(overX>0&&overY>0){
-          if(overX<overY){
-            p.rx+=dx>0?overX:-overX;
-            p.vx=0;
-          } else {
-            p.ry+=dy>0?overY:-overY;
-            p.vy=0;
-          }
+        var fHW = f.w * 0.5 / W;
+        var fHH = f.h * 0.5 / H;
+        dx = p.rx - f.rx;
+        dy = p.ry - f.ry;
+        var oX = fHW + 0.012 - Math.abs(dx);
+        var oY = fHH + 0.008 - Math.abs(dy);
+        if(oX > 0 && oY > 0){
+          if(oX < oY){ p.rx += dx>0?oX:-oX; p.vx=0; }
+          else { p.ry += dy>0?oY:-oY; p.vy=0; }
         }
       }
     }
@@ -1191,212 +1185,330 @@ function physics(){
 }
 
 /* ============================================
-   [SEC-12] NPC AI — 상태별 행동
+   [SEC-12] NPC AI — 상태별 행동 + 자동 말풍선/이모지
    ============================================ */
 function updateAI(){
   for(var i=0;i<people.length;i++){
-    var p=people[i];
-    if(p.selected) continue; /* 선택된 사람은 AI 중지 */
+    var p = people[i];
+    if(p.selected) continue;
 
     p.aiTimer--;
-    if(p.aiTimer<=0){
-      var r=Math.random();
-      if(r<0.3&&!p.sitting){
+    if(p.aiTimer <= 0){
+      var r = Math.random();
+      if(r < 0.3 && !p.sitting){
         /* 걸어다니기 */
-        p.tx=0.08+Math.random()*0.84;
-        p.ty=0.52+Math.random()*0.36;
-        p.aiTimer=150+Math.random()*250|0;
-      } else if(r<0.6){
+        p.tx = 0.08 + Math.random()*0.84;
+        p.ty = 0.52 + Math.random()*0.36;
+        p.state = '🚶 이동 중';
+        p.walking = true;
+        p.aiTimer = (150 + Math.random()*250) | 0;
+      } else if(r < 0.6){
         /* 멈춤 */
-        p.tx=null;p.ty=null;
-        p.walking=false;
-        p.aiTimer=80+Math.random()*200|0;
-      } else if(r<0.8){
+        p.tx = null; p.ty = null;
+        p.walking = false;
+        p.state = STATES[(Math.random()*STATES.length)|0];
+        p.sitting = /코딩|문서|폰|디자인|검색|이메일|메모|읽는/.test(p.state);
+        p.aiTimer = (80 + Math.random()*200) | 0;
+      } else if(r < 0.8){
         /* 말하기 */
-        p.bubble={text:NPC_PHRASES[Math.random()*NPC_PHRASES.length|0],timer:100+Math.random()*60|0,type:'all'};
-        p.aiTimer=100+Math.random()*100|0;
+        p.bubble = {
+          text: NPC_PHRASES[(Math.random()*NPC_PHRASES.length)|0],
+          timer: (100 + Math.random()*60) | 0,
+          type: 'all'
+        };
+        p.aiTimer = (100 + Math.random()*100) | 0;
       } else {
         /* 이모지 */
-        var emojis=['😀','😂','🎉','❤️','👍','🔥','💡','☕','✨','😎','🤔','👋','💪'];
-        p.emoji={char:emojis[Math.random()*emojis.length|0],timer:60};
-        p.aiTimer=60+Math.random()*120|0;
+        p.emoji = {
+          char: NPC_EMOJIS[(Math.random()*NPC_EMOJIS.length)|0],
+          timer: 60
+        };
+        p.aiTimer = (60 + Math.random()*120) | 0;
       }
     }
 
     /* 타이머 감소 */
-    if(p.bubble){p.bubble.timer--;if(p.bubble.timer<=0)p.bubble=null;}
-    if(p.emoji){p.emoji.timer--;if(p.emoji.timer<=0)p.emoji=null;}
+    if(p.bubble){ p.bubble.timer--; if(p.bubble.timer<=0) p.bubble=null; }
+    if(p.emoji){ p.emoji.timer--; if(p.emoji.timer<=0) p.emoji=null; }
   }
 }
 
 /* ============================================
-   [SEC-13] 마우스/터치 입력
+   [SEC-13] 마우스 입력 — 호버/클릭/더블클릭/휠
    ============================================ */
-var mouseDown=false;
 
-canvas.addEventListener('mousemove',function(e){
-  mx=e.clientX;my=e.clientY;
-  /* 호버 감지 */
-  hoverPerson=null;
-  var floorP=people.filter(function(p){return p.floor===curFloor;});
-  for(var i=floorP.length-1;i>=0;i--){
-    var p=floorP[i];
-    if(p._sx!==undefined&&mx>=p._sx&&mx<=p._sx+p._sw&&my>=p._sy&&my<=p._sy+p._sh){
-      hoverPerson=p;
-      cv.style.cursor='pointer';
-      /* 툴팁 표시 */
-      var tt=document.getElementById('tooltip');
-      tt.style.display='block';
-      tt.style.left=Math.min(mx+15,W-230)+'px';
-      tt.style.top=Math.min(my-10,H-80)+'px';
-      tt.querySelector('.tname').textContent=p.name+(p.selected?' (선택됨)':'');
-      tt.querySelector('.tstate').textContent=p.state;
-      tt.querySelector('.tloc').textContent=curFloor+'F | 위치('+Math.round(p.rx*100)+','+Math.round(p.ry*100)+')';
+/** 마우스 이동 → 호버 감지 + 툴팁 */
+cv.addEventListener('mousemove', function(e){
+  mx = e.clientX; my = e.clientY;
+  hoverPerson = null;
+  var fp = people.filter(function(p){return p.floor===curFloor;});
+  for(var i=fp.length-1;i>=0;i--){
+    var p = fp[i];
+    if(p._sx!==undefined && mx>=p._sx && mx<=p._sx+p._sw && my>=p._sy && my<=p._sy+p._sh){
+      hoverPerson = p;
+      cv.style.cursor = 'pointer';
+      var tt = document.getElementById('tooltip');
+      tt.style.display = 'block';
+      tt.style.left = Math.min(mx+15, W-230)+'px';
+      tt.style.top = Math.min(my-10, H-80)+'px';
+      tt.querySelector('.tname').textContent = p.name + (p.selected?' (선택됨)':'');
+      tt.querySelector('.tstate').textContent = p.state;
+      tt.querySelector('.tloc').textContent = p.floor+'F | 위치('+Math.round(p.rx*100)+','+Math.round(p.ry*100)+')';
       return;
     }
   }
-  cv.style.cursor='default';
-  document.getElementById('tooltip').style.display='none';
+  cv.style.cursor = 'default';
+  document.getElementById('tooltip').style.display = 'none';
 });
 
-canvas.addEventListener('click',function(e){
-  var clickX=e.clientX,clickY=e.clientY;
-
-  /* 사람 클릭 검사 */
-  var floorP=people.filter(function(p){return p.floor===curFloor;});
-  var clicked=null;
-  for(var i=floorP.length-1;i>=0;i--){
-    var p=floorP[i];
-    if(p._sx!==undefined&&clickX>=p._sx&&clickX<=p._sx+p._sw&&clickY>=p._sy&&clickY<=p._sy+p._sh){
-      clicked=p;break;
+/** 클릭 → 사람 선택 / 이동 지정 */
+cv.addEventListener('click', function(e){
+  var cx2=e.clientX, cy2=e.clientY;
+  var fp = people.filter(function(p){return p.floor===curFloor;});
+  var clicked = null;
+  for(var i=fp.length-1;i>=0;i--){
+    var p=fp[i];
+    if(p._sx!==undefined && cx2>=p._sx && cx2<=p._sx+p._sw && cy2>=p._sy && cy2<=p._sy+p._sh){
+      clicked=p; break;
     }
   }
 
   if(clicked){
-    /* 이전 선택 해제 */
-    if(selPerson&&selPerson!==clicked) selPerson.selected=false;
-    clicked.selected=!clicked.selected;
-    selPerson=clicked.selected?clicked:null;
+    if(selPerson && selPerson!==clicked) selPerson.selected=false;
+    clicked.selected = !clicked.selected;
+    selPerson = clicked.selected ? clicked : null;
   } else if(selPerson){
     /* 빈 공간 클릭 → 선택된 사람 이동 */
-    var winBot=34+H*0.48-viewY*H*0.15;
-    var targetRx=(clickX-(viewX-0.5)*-80)/W;
-    var targetRy=(clickY-winBot-viewY*30)/(H*1.1)+0.48;
-    targetRx=Math.max(0.05,Math.min(0.95,targetRx));
-    targetRy=Math.max(0.52,Math.min(0.90,targetRy));
-    selPerson.tx=targetRx;
-    selPerson.ty=targetRy;
-    selPerson.sitting=false;
-    selPerson.state='🚶 이동 중';
+    var winBot = 34+H*0.48-viewY*H*0.15;
+    var trx = (cx2-(viewX-0.5)*-80)/W;
+    var tryy = (cy2-winBot-viewY*30)/(H*1.1)+0.48;
+    trx = Math.max(0.05,Math.min(0.95,trx));
+    tryy = Math.max(0.52,Math.min(0.90,tryy));
+    selPerson.tx = trx;
+    selPerson.ty = tryy;
+    selPerson.sitting = false;
+    selPerson.state = '🚶 이동 중';
   }
 });
 
-canvas.addEventListener('dblclick',function(e){
-  if(hoverPerson&&hoverPerson!==selPerson){
-    /* 더블클릭으로 DM 설정 */
-    dmTgt=hoverPerson.id;
-    chatMode='dm';
-    document.getElementById('chatP').classList.add('open');
-    document.getElementById('chatTgt').style.display='block';
-    document.getElementById('tgtN').textContent=hoverPerson.name;
-    document.getElementById('msgI').placeholder=hoverPerson.name+'에게 DM...';
-    document.getElementById('msgI').focus();
-    var tabs=document.querySelectorAll('.ct');
-    tabs.forEach(function(t){t.classList.remove('on')});
-    tabs[1].classList.add('on');
+/** 더블클릭 → DM 설정 */
+cv.addEventListener('dblclick', function(){
+  if(hoverPerson){
+    setDmTarget(hoverPerson.id);
   }
 });
 
-canvas.addEventListener('mouseleave',function(){
-  document.getElementById('tooltip').style.display='none';
-});
+/** 마우스 휠 → 줌 */
+cv.addEventListener('wheel', function(e){
+  e.preventDefault();
+  if(e.deltaY < 0) viewZoom = Math.min(2.5, viewZoom + 0.08);
+  else viewZoom = Math.max(0.5, viewZoom - 0.08);
+}, {passive:false});
 
-/* 터치 */
-var touchSX=0,touchSY=0;
-canvas.addEventListener('touchstart',function(e){
-  var t=e.touches[0];touchSX=t.clientX;touchSY=t.clientY;
-},{passive:true});
-canvas.addEventListener('touchmove',function(e){
-  var t=e.touches[0];
-  viewX+=-(t.clientX-touchSX)*0.001;
-  viewY+=(t.clientY-touchSY)*0.001;
-  viewX=Math.max(0,Math.min(1,viewX));
-  viewY=Math.max(0,Math.min(1,viewY));
-  touchSX=t.clientX;touchSY=t.clientY;
-},{passive:true});
+/** 마우스 나감 → 툴팁 숨김 */
+cv.addEventListener('mouseleave', function(){
+  document.getElementById('tooltip').style.display = 'none';
+});
 
 /* ============================================
-   [SEC-14] 키보드 입력 — 뷰 이동
+   [SEC-14] 터치 입력 (모바일)
    ============================================ */
-var keys={};
-document.addEventListener('keydown',function(e){
-  keys[e.code]=true;
-  if(e.code==='Enter'){
+var touchSX=0, touchSY=0, touchMoved=false;
+
+cv.addEventListener('touchstart', function(e){
+  var t=e.touches[0]; touchSX=t.clientX; touchSY=t.clientY; touchMoved=false;
+}, {passive:true});
+
+cv.addEventListener('touchmove', function(e){
+  var t=e.touches[0];
+  viewX += -(t.clientX-touchSX)*0.001;
+  viewY += (t.clientY-touchSY)*0.001;
+  viewX = Math.max(0,Math.min(1,viewX));
+  viewY = Math.max(0,Math.min(1,viewY));
+  touchSX=t.clientX; touchSY=t.clientY;
+  touchMoved=true;
+}, {passive:true});
+
+cv.addEventListener('touchend', function(e){
+  if(!touchMoved){
+    /* 탭 = 클릭과 동일 */
+    var fakeEvt = {clientX:touchSX, clientY:touchSY};
+    /* 사람 선택/이동 로직 재사용 */
+    var fp = people.filter(function(p){return p.floor===curFloor;});
+    var clicked = null;
+    for(var i=fp.length-1;i>=0;i--){
+      var p=fp[i];
+      if(p._sx!==undefined && touchSX>=p._sx && touchSX<=p._sx+p._sw && touchSY>=p._sy && touchSY<=p._sy+p._sh){
+        clicked=p; break;
+      }
+    }
+    if(clicked){
+      if(selPerson && selPerson!==clicked) selPerson.selected=false;
+      clicked.selected=!clicked.selected;
+      selPerson=clicked.selected?clicked:null;
+    } else if(selPerson){
+      var winBot=34+H*0.48-viewY*H*0.15;
+      selPerson.tx=Math.max(0.05,Math.min(0.95,(touchSX-(viewX-0.5)*-80)/W));
+      selPerson.ty=Math.max(0.52,Math.min(0.90,(touchSY-winBot-viewY*30)/(H*1.1)+0.48));
+      selPerson.sitting=false;selPerson.state='🚶 이동 중';
+    }
+  }
+});
+
+/* ============================================
+   [SEC-15] 키보드 입력
+   ============================================ */
+var keys = {};
+
+document.addEventListener('keydown', function(e){
+  keys[e.code] = true;
+
+  /* Enter — 채팅 토글/전송 */
+  if(e.code === 'Enter'){
     var cp=document.getElementById('chatP');
     var inp=document.getElementById('msgI');
-    if(cp.classList.contains('open')&&document.activeElement===inp){
-      sendMsg(inp.value);inp.value='';
+    if(cp.classList.contains('open') && document.activeElement===inp){
+      sendMsg(inp.value); inp.value='';
     } else {
       cp.classList.add('open');
       setTimeout(function(){inp.focus()},100);
     }
     e.preventDefault();
   }
+
+  /* Escape — 패널 닫기 */
   if(e.code==='Escape'){
     document.getElementById('chatP').classList.remove('open');
+    document.getElementById('pplP').classList.remove('open');
     document.getElementById('helpM').style.display='none';
     document.getElementById('helpO').style.display='none';
   }
-  if(document.activeElement.tagName!=='INPUT'){
-    if(e.code==='Digit1')switchFloor(15);
-    if(e.code==='Digit2')switchFloor(14);
-    if(e.code==='Digit3')switchFloor(13);
-    if(e.code==='Equal')viewZoom=Math.min(2.5,viewZoom+0.1);
-    if(e.code==='Minus')viewZoom=Math.max(0.5,viewZoom-0.1);
+
+  /* Tab — 사람 목록 토글 */
+  if(e.code==='Tab'){
+    e.preventDefault();
+    document.getElementById('pplP').classList.toggle('open');
+  }
+
+  /* E — 이모지 (선택된 사람에게) */
+  if(e.code==='KeyE' && document.activeElement.tagName!=='INPUT'){
+    var target = selPerson || (people.length>0?people[0]:null);
+    if(target){
+      target.emoji = {
+        char: NPC_EMOJIS[(Math.random()*NPC_EMOJIS.length)|0],
+        timer: 80
+      };
+    }
+  }
+
+  /* 숫자 1~3 — 층 이동 */
+  if(document.activeElement.tagName !== 'INPUT'){
+    if(e.code==='Digit1') switchFloor(15);
+    if(e.code==='Digit2') switchFloor(14);
+    if(e.code==='Digit3') switchFloor(13);
+    if(e.code==='Equal') viewZoom=Math.min(2.5,viewZoom+0.1);
+    if(e.code==='Minus') viewZoom=Math.max(0.5,viewZoom-0.1);
   }
 });
-document.addEventListener('keyup',function(e){keys[e.code]=false;});
 
+document.addEventListener('keyup', function(e){ keys[e.code]=false; });
+
+/** 매 프레임 뷰 키 처리 */
 function handleViewKeys(){
-  var spd=0.008;
-  if(keys['KeyW']||keys['ArrowUp'])viewY=Math.max(0,viewY-spd);
-  if(keys['KeyS']||keys['ArrowDown'])viewY=Math.min(1,viewY+spd);
-  if(keys['KeyA']||keys['ArrowLeft'])viewX=Math.max(0,viewX-spd);
+  var spd = 0.008;
+  if(keys['KeyW']||keys['ArrowUp'])   viewY=Math.max(0,viewY-spd);
+  if(keys['KeyS']||keys['ArrowDown']) viewY=Math.min(1,viewY+spd);
+  if(keys['KeyA']||keys['ArrowLeft']) viewX=Math.max(0,viewX-spd);
   if(keys['KeyD']||keys['ArrowRight'])viewX=Math.min(1,viewX+spd);
 }
 
 /* ============================================
-   [SEC-15] 채팅 시스템
+   [SEC-16] 채팅 / 메시지 시스템 (전체/DM/그룹)
    ============================================ */
-function sendMsg(text){
-  if(!text||!text.trim())return;
-  text=text.trim();
-  var msg={from:'나',fromId:-1,text:text,time:new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}),type:chatMode,target:null};
-  if(chatMode==='dm'&&dmTgt!==null){
-    msg.type='dm';
-    msg.target=people[dmTgt].name;
-    /* DM 대상 반응 */
-    setTimeout(function(){
-      if(people[dmTgt])
-        people[dmTgt].bubble={text:NPC_PHRASES[Math.random()*NPC_PHRASES.length|0],timer:120,type:'dm'};
-    },600+Math.random()*1000);
-  }
-  chatMsgs.push(msg);
+
+/** DM 타겟 설정 */
+function setDmTarget(id){
+  dmTgt = id;
+  chatMode = 'dm';
+  document.getElementById('chatP').classList.add('open');
+  document.getElementById('chatTgt').style.display = 'block';
+  document.getElementById('tgtN').textContent = people[id].name;
+  document.getElementById('msgI').placeholder = people[id].name+'에게 DM...';
+  document.getElementById('msgI').focus();
+  var tabs=document.querySelectorAll('.ct');
+  tabs.forEach(function(t){t.classList.remove('on')});
+  tabs[1].classList.add('on');
   renderMsgs();
-  /* 내 말풍선 */
-  if(selPerson) selPerson.bubble={text:text,timer:100,type:msg.type};
 }
 
+/** 메시지 전송 */
+function sendMsg(text){
+  if(!text||!text.trim()) return;
+  text = text.trim();
+  var msg = {from:'나',fromId:-1,text:text,
+    time:new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}),
+    type:chatMode,target:null,targetIds:[]};
+
+  if(chatMode==='dm' && dmTgt!==null){
+    msg.type='dm';
+    msg.target=people[dmTgt].name;
+    msg.targetIds=[dmTgt];
+    /* DM 대상 자동 반응 */
+    setTimeout(function(){
+      if(people[dmTgt])
+        people[dmTgt].bubble={text:NPC_PHRASES[(Math.random()*NPC_PHRASES.length)|0],timer:120,type:'dm'};
+    },600+Math.random()*1000);
+  } else if(chatMode==='group' && groupTgts.length>0){
+    msg.type='group';
+    msg.targetIds=groupTgts.slice();
+    msg.target=groupTgts.map(function(id){return people[id].name}).join(', ');
+    /* 그룹 대상 반응 */
+    groupTgts.forEach(function(gid){
+      setTimeout(function(){
+        if(people[gid])
+          people[gid].emoji={char:NPC_EMOJIS[(Math.random()*NPC_EMOJIS.length)|0],timer:60};
+      },400+Math.random()*1500);
+    });
+  }
+
+  chatMsgs.push(msg);
+
+  /* 내 말풍선 (선택된 사람 or 첫 번째) */
+  var me = selPerson || people[0];
+  if(me) me.bubble = {text:text, timer:100, type:msg.type};
+
+  /* 전체 메시지일 때 근처 NPC 이모지 반응 */
+  if(chatMode==='all' && me){
+    for(var i=0;i<people.length;i++){
+      if(people[i].floor===curFloor && people[i]!==me){
+        var d=Math.sqrt(Math.pow(people[i].rx-me.rx,2)+Math.pow(people[i].ry-me.ry,2));
+        if(d<0.15 && Math.random()<0.3){
+          (function(idx){setTimeout(function(){
+            people[idx].emoji={char:NPC_EMOJIS[(Math.random()*NPC_EMOJIS.length)|0],timer:80};
+          },500+Math.random()*2000);})(i);
+        }
+      }
+    }
+  }
+
+  renderMsgs();
+}
+
+/** 채팅 메시지 렌더 */
 function renderMsgs(){
-  var c=document.getElementById('chatMsgs');c.innerHTML='';
-  var msgs=chatMode==='dm'?chatMsgs.filter(function(m){return m.type==='dm'}):chatMsgs;
-  var start=Math.max(0,msgs.length-40);
+  var c=document.getElementById('chatMsgs'); c.innerHTML='';
+  var msgs=chatMsgs;
+  if(chatMode==='dm') msgs=chatMsgs.filter(function(m){return m.type==='dm'});
+  else if(chatMode==='group') msgs=chatMsgs.filter(function(m){return m.type==='group'});
+
+  var start=Math.max(0,msgs.length-50);
   for(var i=start;i<msgs.length;i++){
     var m=msgs[i];
     var d=document.createElement('div');
     d.className='cm '+(m.fromId===-1?'me':'ot');
     var h='<b>'+m.from;
-    if(m.type==='dm')h+=' <span style="color:#FF6B6B;font-size:8px">→ '+m.target+'</span>';
+    if(m.type==='dm') h+=' <span style="color:#FF6B6B;font-size:8px">→ '+m.target+'</span>';
+    else if(m.type==='group') h+=' <span style="color:#AB47BC;font-size:8px">그룹</span>';
     h+=' <span style="opacity:.4;font-weight:400">'+m.time+'</span></b>';
     d.innerHTML=h+m.text;
     c.appendChild(d);
@@ -1405,23 +1517,128 @@ function renderMsgs(){
 }
 
 /* ============================================
-   [SEC-16] UI 이벤트 바인딩
+   [SEC-17] 사람 목록 패널 UI
    ============================================ */
+
+/** 사람 목록 렌더링 */
+function renderPeopleList(){
+  var container=document.getElementById('pplList');
+  container.innerHTML='';
+  var fp=people.filter(function(p){return p.floor===curFloor});
+  document.getElementById('pplCnt').textContent=fp.length;
+
+  for(var i=0;i<fp.length;i++){
+    var p=fp[i];
+    var item=document.createElement('div');
+    item.className='pi';
+    item.setAttribute('data-id',p.id);
+
+    /* 미니 아바타 캔버스 */
+    var ac=document.createElement('canvas');
+    ac.width=24;ac.height=24;
+    var ax=ac.getContext('2d');
+    ax.fillStyle=p.shirt;ax.fillRect(4,12,16,12);
+    ax.fillStyle=p.skin;ax.fillRect(5,1,14,12);
+    ax.fillStyle=p.hair;ax.fillRect(5,0,14,5);
+    ax.fillStyle='#222';ax.fillRect(8,5,2,2);ax.fillRect(14,5,2,2);
+
+    var info=document.createElement('div');
+    info.style.cssText='flex:1;overflow:hidden';
+    info.innerHTML='<div class="pn">'+(p.selected?'⭐ ':'')+p.name+'</div><div class="ps">'+p.state+'</div>';
+
+    var selBtn=document.createElement('span');
+    selBtn.className='sel';selBtn.textContent='선택';selBtn.setAttribute('data-id',p.id);
+
+    var dmBtn=document.createElement('span');
+    dmBtn.className='dm';dmBtn.textContent='DM';dmBtn.setAttribute('data-id',p.id);
+
+    item.appendChild(ac);
+    item.appendChild(info);
+    item.appendChild(selBtn);
+    item.appendChild(dmBtn);
+    container.appendChild(item);
+  }
+}
+
+/* 사람 목록 이벤트 위임 */
+document.getElementById('pplList').addEventListener('click',function(e){
+  var el=e.target;
+  if(el.classList.contains('dm')){
+    setDmTarget(parseInt(el.getAttribute('data-id')));
+    document.getElementById('pplP').classList.remove('open');
+  }
+  if(el.classList.contains('sel')){
+    var id=parseInt(el.getAttribute('data-id'));
+    if(selPerson) selPerson.selected=false;
+    people[id].selected=true;
+    selPerson=people[id];
+    document.getElementById('pplP').classList.remove('open');
+  }
+});
+
+/* ============================================
+   [SEC-18] 미니맵 (우하단)
+   ============================================ */
+function drawMinimap(){
+  var mw=130,mh=70;
+  var mx2=W-mw-12,my2=H-mh-55;
+
+  cx.fillStyle='rgba(0,0,0,0.5)';cx.fillRect(mx2-1,my2-1,mw+2,mh+2);
+  cx.fillStyle='rgba(245,230,202,0.6)';cx.fillRect(mx2,my2,mw,mh);
+
+  /* 가구 점 */
+  cx.fillStyle='rgba(0,0,0,0.12)';
+  for(var i=0;i<furniture.length;i++){
+    var f=furniture[i];if(f.floor!==curFloor)continue;
+    cx.fillRect((mx2+f.rx*mw)|0,(my2+((f.ry-0.48)/0.44)*mh)|0,Math.max(1,(f.w*mw/W)|0),Math.max(1,(f.h*mh/H)|0));
+  }
+
+  /* 사람 점 */
+  var fp=people.filter(function(p){return p.floor===curFloor});
+  for(var j=0;j<fp.length;j++){
+    var p=fp[j];
+    cx.fillStyle=p.selected?'#4ECDC4':p===hoverPerson?'#FFD93D':'#E74C3C';
+    cx.fillRect((mx2+p.rx*mw)|0,(my2+((p.ry-0.48)/0.44)*mh)|0,3,3);
+  }
+
+  cx.strokeStyle='rgba(255,255,255,0.2)';cx.lineWidth=1;cx.strokeRect(mx2,my2,mw,mh);
+  cx.fillStyle='rgba(255,255,255,0.5)';cx.font='8px sans-serif';cx.textAlign='left';
+  cx.fillText(curFloor+'F',mx2+3,my2+mh-3);
+}
+
+/* ============================================
+   [SEC-19] UI 이벤트 바인딩 — 모든 버튼
+   ============================================ */
+
+/* --- 채팅 전송 --- */
 document.getElementById('msgB').addEventListener('click',function(){
   var inp=document.getElementById('msgI');sendMsg(inp.value);inp.value='';inp.focus();
 });
+
+/* --- 채팅 닫기 --- */
 document.getElementById('chatX').addEventListener('click',function(){
   document.getElementById('chatP').classList.remove('open');
 });
+
+/* --- 채팅 탭 전환 (전체/DM/그룹) --- */
 document.querySelectorAll('.ct').forEach(function(t){
   t.addEventListener('click',function(){
     document.querySelectorAll('.ct').forEach(function(t2){t2.classList.remove('on')});
     this.classList.add('on');
     chatMode=this.getAttribute('data-m');
     if(chatMode!=='dm'){dmTgt=null;document.getElementById('chatTgt').style.display='none';document.getElementById('msgI').placeholder='Enter로 채팅...';}
+    if(chatMode==='group'){
+      /* 그룹 모드: 현재 층 근처 사람 5명 자동 선택 */
+      groupTgts=[];
+      var fp=people.filter(function(p){return p.floor===curFloor&&!p.selected});
+      for(var i=0;i<Math.min(5,fp.length);i++) groupTgts.push(fp[i].id);
+      document.getElementById('msgI').placeholder='그룹 메시지 ('+groupTgts.length+'명)...';
+    }
     renderMsgs();
   });
 });
+
+/* --- DM 타겟 해제 --- */
 document.getElementById('tgtC').addEventListener('click',function(){
   dmTgt=null;chatMode='all';
   document.getElementById('chatTgt').style.display='none';
@@ -1430,118 +1647,114 @@ document.getElementById('tgtC').addEventListener('click',function(){
   document.querySelectorAll('.ct')[0].classList.add('on');
   renderMsgs();
 });
+
+/* --- 툴바 버튼들 --- */
+document.getElementById('bPpl').addEventListener('click',function(){
+  var p=document.getElementById('pplP');p.classList.toggle('open');
+  if(p.classList.contains('open')) renderPeopleList();
+});
 document.getElementById('bChat').addEventListener('click',function(){document.getElementById('chatP').classList.toggle('open');});
+document.getElementById('bEmoji').addEventListener('click',function(){
+  var target=selPerson||(people.length>0?people[0]:null);
+  if(target) target.emoji={char:NPC_EMOJIS[(Math.random()*NPC_EMOJIS.length)|0],timer:80};
+});
+document.getElementById('bDance').addEventListener('click',function(){
+  danceMode=!danceMode;this.classList.toggle('on',danceMode);
+  /* 현재 층 모든 사람 댄스 토글 */
+  people.forEach(function(p){if(p.floor===curFloor) p.dancing=danceMode;});
+});
 document.getElementById('bUp').addEventListener('click',function(){viewY=Math.max(0,viewY-0.08);});
 document.getElementById('bDown').addEventListener('click',function(){viewY=Math.min(1,viewY+0.08);});
 document.getElementById('bZoomIn').addEventListener('click',function(){viewZoom=Math.min(2.5,viewZoom+0.15);});
 document.getElementById('bZoomOut').addEventListener('click',function(){viewZoom=Math.max(0.5,viewZoom-0.15);});
+document.getElementById('bReset').addEventListener('click',function(){
+  /* 전체 리셋 */
+  if(selPerson) selPerson.selected=false;
+  selPerson=null;danceMode=false;
+  document.getElementById('bDance').classList.remove('on');
+  viewX=0.5;viewY=0.5;viewZoom=1.0;
+  people.forEach(function(p){p.dancing=false;p.bubble=null;p.emoji=null;});
+});
 document.getElementById('bHelp').addEventListener('click',function(){document.getElementById('helpM').style.display='block';document.getElementById('helpO').style.display='block';});
 document.getElementById('hx').addEventListener('click',function(){document.getElementById('helpM').style.display='none';document.getElementById('helpO').style.display='none';});
 document.getElementById('helpO').addEventListener('click',function(){document.getElementById('helpM').style.display='none';document.getElementById('helpO').style.display='none';});
 
+/* --- 층 버튼 --- */
 document.querySelectorAll('.fbtn').forEach(function(b){
   b.addEventListener('click',function(){switchFloor(parseInt(this.getAttribute('data-f')))});
 });
 
+/** 층 전환 */
 function switchFloor(f){
   curFloor=f;
   document.querySelectorAll('.fbtn').forEach(function(b){b.classList.toggle('on',parseInt(b.getAttribute('data-f'))===f)});
   if(selPerson){selPerson.selected=false;selPerson=null;}
+  danceMode=false;document.getElementById('bDance').classList.remove('on');
+  /* 사람 목록 갱신 */
+  if(document.getElementById('pplP').classList.contains('open')) renderPeopleList();
 }
 
 /* ============================================
-   [SEC-17] 미니맵 (우하단)
-   ============================================ */
-function drawMinimap(){
-  var mw=130,mh=70;
-  var mx2=W-mw-12,my2=H-mh-55;
-  /* 배경 */
-  cx.fillStyle='rgba(0,0,0,0.5)';
-  cx.fillRect(mx2-1,my2-1,mw+2,mh+2);
-  cx.fillStyle='rgba(245,230,202,0.6)';
-  cx.fillRect(mx2,my2,mw,mh);
-  /* 가구 점 */
-  cx.fillStyle='rgba(0,0,0,0.15)';
-  for(var i=0;i<furniture.length;i++){
-    var f=furniture[i];
-    if(f.floor!==curFloor)continue;
-    cx.fillRect(mx2+f.rx*mw|0,my2+((f.ry-0.48)/0.44)*mh|0,f.w*mw/W|0||1,f.h*mh/H|0||1);
-  }
-  /* 사람 점 */
-  var fp=people.filter(function(p){return p.floor===curFloor});
-  for(var j=0;j<fp.length;j++){
-    var p=fp[j];
-    cx.fillStyle=p.selected?'#4ECDC4':p===hoverPerson?'#FFD93D':'#E74C3C';
-    cx.fillRect(mx2+p.rx*mw|0,my2+((p.ry-0.48)/0.44)*mh|0,3,3);
-  }
-  /* 테두리 */
-  cx.strokeStyle='rgba(255,255,255,0.2)';cx.lineWidth=1;
-  cx.strokeRect(mx2,my2,mw,mh);
-  /* 레이블 */
-  cx.fillStyle='rgba(255,255,255,0.5)';cx.font='8px sans-serif';cx.textAlign='left';
-  cx.fillText(curFloor+'F',mx2+3,my2+mh-3);
-}
-
-/* ============================================
-   [SEC-18] 메인 게임 루프
+   [SEC-20] 메인 게임 루프
    ============================================ */
 function loop(){
   requestAnimationFrame(loop);
   TICK++;
 
-  /* 뷰 키 입력 */
+  /* --- 입력 처리 --- */
   handleViewKeys();
 
-  /* AI 업데이트 (5프레임마다) */
-  if(TICK%5===0) updateAI();
+  /* --- NPC AI (5프레임마다) --- */
+  if(TICK % 5 === 0) updateAI();
 
-  /* 물리 */
+  /* --- 물리 --- */
   physics();
 
-  /* === 렌더링 === */
-  cx.clearRect(0,0,W,H);
+  /* === 렌더링 시작 === */
+  cx.clearRect(0, 0, W, H);
 
-  /* [1] 배경 — 창밖 뷰 */
+  /* [레이어 1] 배경 — 창밖 크루즈항구/산/바다 뷰 */
   drawBg();
 
-  /* [2] 창틀 프레임 */
+  /* [레이어 2] 창틀 프레임 */
   drawWindowFrame();
 
-  /* [3] 바닥 & 천장 & 벽 */
-  drawFloor();
+  /* [레이어 3] 실내 — 바닥/천장/벽/조명 */
+  drawInterior();
 
-  /* [4] 가구 */
-  drawFurniture();
+  /* [레이어 4] 가구 */
+  drawAllFurniture();
 
-  /* [5] 사람 (Y 정렬) */
-  var floorPeople=people.filter(function(p){return p.floor===curFloor});
-  floorPeople.sort(function(a,b){return a.ry-b.ry});
-  for(var i=0;i<floorPeople.length;i++){
-    drawPerson(floorPeople[i]);
+  /* [레이어 5] 캐릭터 (Y 정렬: 아래쪽이 위에 그려짐) */
+  var fp = people.filter(function(p){return p.floor===curFloor});
+  fp.sort(function(a,b){return a.ry - b.ry});
+  for(var i = 0; i < fp.length; i++){
+    drawPerson(fp[i]);
   }
 
-  /* [6] 미니맵 */
-  if(TICK%3===0) drawMinimap();
+  /* [레이어 6] 미니맵 */
+  if(TICK % 3 === 0) drawMinimap();
 
-  /* [7] HUD 업데이트 */
-  if(TICK%20===0){
-    var cnt=people.filter(function(p){return p.floor===curFloor}).length;
-    document.getElementById('info').textContent=cnt+'명 | '+curFloor+'F | view('+Math.round(viewX*100)+','+Math.round(viewY*100)+')';
+  /* [레이어 7] HUD 정보 업데이트 */
+  if(TICK % 20 === 0){
+    var cnt = people.filter(function(p){return p.floor===curFloor}).length;
+    document.getElementById('info').textContent =
+      cnt+'명 | '+curFloor+'F | view('+Math.round(viewX*100)+','+Math.round(viewY*100)+') | zoom:'+viewZoom.toFixed(1);
   }
 }
 
 /* ============================================
-   [SEC-19] 초기화
+   [SEC-21] 초기화 & 시작
    ============================================ */
 initPeople();
 initFurniture();
 initBg();
 
-/* 게임 시작 */
+/* 시작! */
 requestAnimationFrame(loop);
 
 console.log('%c🏢 PIXEL OFFICE 로드 완료!','color:#4ECDC4;font-size:14px;font-weight:bold');
-console.log('WASD: 뷰이동 | 클릭: 사람선택/이동 | Enter: 채팅 | 1~3: 층이동 | +/-: 줌');
+console.log('WASD: 뷰이동 | 클릭: 사람선택/이동 | Enter: 채팅 | Tab: 사람목록 | E: 이모지 | 1~3: 층이동 | +/-: 줌 | 휠: 줌');
 
 })();
 </script>
